@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SympGuard AI — Understand Your Symptoms. Know What To Do Next.</title>
+<meta name="description" content="SympGuard AI helps you organize symptoms, answer relevant follow-up questions, and understand when professional medical care may be needed. Educational guidance only — not a medical diagnosis.">
+<!-- Edit this before deploying to a real backend URL, see README "Deployment" -->
+<!-- <meta name="sympguard-api-base" content="https://your-api.example.com"> -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27%3E%3Ctext y=%2720%27 font-size=%2720%27%3E%F0%9F%9B%A1%EF%B8%8F%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/styles.css">
+<style>
+  /* ---- landing-page-only styles ---- */
+  .hero { padding: var(--space-8) 0 var(--space-7); }
+  .hero .wrap { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: var(--space-8); align-items: center; }
+  .hero h1 { font-size: clamp(2.1rem, 4vw, 3.2rem); }
+  .hero .lede { font-size: 1.15rem; color: var(--ink-soft); }
+  .hero-ctas { display: flex; gap: var(--space-4); flex-wrap: wrap; margin: var(--space-5) 0; }
+  .safety-line { display: inline-flex; align-items: center; gap: var(--space-2); font-size: 0.9rem; color: var(--ink-soft); background: var(--surface-sunken); border: 1px solid var(--border); padding: 0.5em 0.9em; border-radius: 999px; }
+
+  .triage-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); padding: var(--space-5); }
+  .triage-panel .panel-label { font-size: 0.85rem; color: var(--ink-faint); margin-bottom: var(--space-4); }
+  .triage-row { display: flex; align-items: center; gap: var(--space-4); padding: var(--space-3) 0; border-bottom: 1px solid var(--border); }
+  .triage-row:last-child { border-bottom: none; }
+  .triage-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  .triage-bar { flex: 1; height: 10px; border-radius: 6px; background: var(--surface-sunken); overflow: hidden; }
+  .triage-bar span { display: block; height: 100%; border-radius: 6px; }
+  .triage-label { font-size: 0.9rem; font-weight: 600; width: 168px; flex-shrink: 0; }
+
+  .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5); }
+  .feature-card h3 { font-size: 1.05rem; margin-bottom: var(--space-2); }
+  .feature-card .icon { width: 40px; height: 40px; border-radius: 10px; background: var(--brand-light); display: flex; align-items: center; justify-content: center; margin-bottom: var(--space-4); }
+  .feature-card .icon svg { width: 22px; height: 22px; stroke: var(--brand-dark); }
+
+  .steps-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-5); position: relative; }
+  .step { position: relative; padding-top: var(--space-5); }
+  .step .num { font-size: 0.85rem; font-weight: 700; color: var(--brand); letter-spacing: 0.02em; }
+  .step h3 { font-size: 1.05rem; margin: var(--space-2) 0; }
+  @media (min-width: 821px) {
+    .steps-grid { align-items: start; }
+    .step:not(:last-child)::after {
+      content: ""; position: absolute; top: 10px; left: calc(100% + var(--space-2)); width: calc(var(--space-5) - 4px);
+      height: 1px; background: var(--border-strong);
+    }
+  }
+
+  .safety-section { background: var(--brand-light); border-radius: var(--radius-lg); padding: var(--space-7); }
+  .safety-points { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-4); margin: var(--space-5) 0; }
+  .safety-point { display: flex; gap: var(--space-3); align-items: flex-start; }
+  .safety-point .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--brand); margin-top: 0.5em; flex-shrink: 0; }
+
+  .emergency-card { background: var(--emergency-bg); border: 1px solid var(--emergency-border); border-radius: var(--radius-lg); padding: var(--space-6); }
+  .emergency-card h2 { color: var(--emergency); }
+  .emergency-actions { display: flex; gap: var(--space-3); flex-wrap: wrap; margin-top: var(--space-5); }
+
+  .firstaid-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-4); }
+  .firstaid-card { display: block; text-decoration: none; color: inherit; }
+  .firstaid-card .card { transition: border-color 0.15s ease, transform 0.12s ease; height: 100%; }
+  .firstaid-card:hover .card { border-color: var(--brand); transform: translateY(-2px); }
+  .firstaid-card h3 { font-size: 0.98rem; margin: 0; }
+
+  @media (max-width: 980px) {
+    .features-grid, .firstaid-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 820px) {
+    .hero .wrap { grid-template-columns: 1fr; }
+    .steps-grid { grid-template-columns: 1fr 1fr; }
+    .safety-points { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 560px) {
+    .features-grid, .firstaid-grid, .steps-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+
+<header class="site-header">
+  <div class="wrap">
+    <a href="index.html" class="brand-mark">
+      <span class="mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 9 8 11 4.6-2 8-6 8-11V5l-8-3Z"/><path d="M9 12l2 2 4-4"/></svg>
+      </span>
+      SympGuard AI
+    </a>
+    <nav class="main-nav" id="main-nav">
+      <ul>
+        <li><a href="#how-it-works">How It Works</a></li>
+        <li><a href="#safety">Safety</a></li>
+        <li><a href="first-aid.html">First Aid</a></li>
+        <li><a href="emergency.html">Emergency Help</a></li>
+        <li><a href="#about">About</a></li>
+      </ul>
+    </nav>
+    <div class="row" style="align-items:center; gap: var(--space-3);">
+      <a class="btn btn-primary header-cta" href="app.html">Check My Symptoms</a>
+      <button class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="main-nav" aria-label="Toggle navigation menu">☰</button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="wrap">
+      <div>
+        <h1>Understand Your Symptoms.<br>Know What To Do Next.</h1>
+        <p class="lede">SympGuard AI helps you organize symptoms, answer relevant follow-up questions, understand possible causes, and identify when professional medical care may be needed.</p>
+        <div class="hero-ctas">
+          <a href="app.html" class="btn btn-primary btn-lg">Start Symptom Check</a>
+          <a href="#how-it-works" class="btn btn-secondary btn-lg">How It Works</a>
+        </div>
+        <span class="safety-line">🛈 Educational guidance only — not a medical diagnosis.</span>
+      </div>
+      <div class="triage-panel" aria-hidden="true">
+        <div class="panel-label">HOW SYMPGUARD CATEGORIZES URGENCY</div>
+        <div class="triage-row">
+          <span class="triage-dot" style="background:var(--emergency)"></span>
+          <span class="triage-label">Emergency</span>
+          <span class="triage-bar"><span style="width:95%; background:var(--emergency)"></span></span>
+        </div>
+        <div class="triage-row">
+          <span class="triage-dot" style="background:var(--urgent)"></span>
+          <span class="triage-label">Urgent evaluation</span>
+          <span class="triage-bar"><span style="width:70%; background:var(--urgent)"></span></span>
+        </div>
+        <div class="triage-row">
+          <span class="triage-dot" style="background:var(--routine)"></span>
+          <span class="triage-label">Routine consultation</span>
+          <span class="triage-bar"><span style="width:45%; background:var(--routine)"></span></span>
+        </div>
+        <div class="triage-row">
+          <span class="triage-dot" style="background:var(--selfcare)"></span>
+          <span class="triage-label">Self-care / monitoring</span>
+          <span class="triage-bar"><span style="width:20%; background:var(--selfcare)"></span></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="section-tight">
+    <div class="wrap">
+      <h2 class="center" style="max-width:640px;margin:0 auto var(--space-6);">Built around one idea: tell you what you need to know, honestly</h2>
+      <div class="features-grid">
+        <div class="feature-card card">
+          <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 9h8M8 13h5M21 12a9 9 0 1 1-9-9c2 0 3.7.6 5.1 1.6"/><path d="M21 3v6h-6"/></svg></span>
+          <h3>Adaptive Questions</h3>
+          <p class="muted">Answers determine what we ask next — not a fixed, one-size-fits-all form.</p>
+        </div>
+        <div class="feature-card card">
+          <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 9 8 11 4.6-2 8-6 8-11V5l-8-3Z"/></svg></span>
+          <h3>Safety First</h3>
+          <p class="muted">Red-flag checks run independently from AI-generated explanations, and always win.</p>
+        </div>
+        <div class="feature-card card">
+          <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg></span>
+          <h3>Evidence Grounded</h3>
+          <p class="muted">View the information sources used for the assessment — no fabricated citations.</p>
+        </div>
+        <div class="feature-card card">
+          <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l2.5 2.5"/></svg></span>
+          <h3>Explainable Results</h3>
+          <p class="muted">Understand why certain possibilities were considered, in plain language.</p>
+        </div>
+        <div class="feature-card card">
+          <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4.5 8-11V5l-8-3-8 3v6c0 6.5 8 11 8 11Z"/><path d="M9 12l2 2 4-4"/></svg></span>
+          <h3>First Aid</h3>
+          <p class="muted">Concise, curated immediate safety guidance for supported situations.</p>
+        </div>
+        <div class="feature-card card">
+          <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M9 15h6M9 11h3"/></svg></span>
+          <h3>Doctor Summary</h3>
+          <p class="muted">A structured summary you can copy, print, and discuss with a clinician.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="section" id="how-it-works">
+    <div class="wrap">
+      <h2 class="center" style="max-width:520px;margin:0 auto var(--space-6);">How it works</h2>
+      <div class="steps-grid">
+        <div class="step"><div class="num">01</div><h3>Describe symptoms</h3><p class="muted">Tell us what you're experiencing, in your own words.</p></div>
+        <div class="step"><div class="num">02</div><h3>Answer adaptive questions</h3><p class="muted">A short, relevant set of follow-ups — never a long fixed form.</p></div>
+        <div class="step"><div class="num">03</div><h3>Safety + evidence analysis</h3><p class="muted">An independent safety check runs alongside symptom matching.</p></div>
+        <div class="step"><div class="num">04</div><h3>Understand next steps</h3><p class="muted">A clear urgency level, explanation, and what to do next.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SAFETY -->
+  <section class="section-tight" id="safety">
+    <div class="wrap">
+      <div class="safety-section">
+        <h2>Your safety comes first.</h2>
+        <p class="muted" style="max-width:640px;">SympGuard AI is built so that safety checks can never be quietly overridden by anything else in the system — including AI-generated text.</p>
+        <div class="safety-points">
+          <div class="safety-point"><span class="dot"></span><p style="margin:0;">Emergency red flags are checked by a separate, deterministic system — independent of AI matching.</p></div>
+          <div class="safety-point"><span class="dot"></span><p style="margin:0;">AI-generated explanations can never override or downgrade an emergency safety result.</p></div>
+          <div class="safety-point"><span class="dot"></span><p style="margin:0;">Every result is informational — SympGuard AI never states a diagnosis as fact.</p></div>
+          <div class="safety-point"><span class="dot"></span><p style="margin:0;">Professional medical care is always the recommended path when it may be needed.</p></div>
+        </div>
+        <a href="emergency.html" class="btn btn-primary">View Safety Information</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- EMERGENCY -->
+  <section class="section-tight">
+    <div class="wrap">
+      <div class="emergency-card">
+        <h2>If you think you are experiencing a medical emergency, don't wait for an AI assessment.</h2>
+        <p class="muted">SympGuard AI does not dispatch an ambulance or contact emergency services on your behalf — it can only show you the right number to call.</p>
+        <div class="emergency-actions">
+          <a href="tel:112" class="btn btn-emergency btn-lg">Call 112 — Emergency</a>
+          <a href="tel:108" class="btn btn-emergency btn-lg">Call 108 — Ambulance</a>
+          <a href="emergency.html" class="btn btn-secondary btn-lg">View Emergency Help</a>
+        </div>
+        <p class="faint" style="margin-top:var(--space-4);">Numbers shown are a hackathon demo configuration for India (Tamil Nadu). Emergency numbers are configurable per region — see the Emergency Help page.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FIRST AID PREVIEW -->
+  <section class="section">
+    <div class="wrap">
+      <div class="row" style="justify-content:space-between; align-items:baseline;">
+        <h2>First-aid library</h2>
+        <a href="first-aid.html" class="muted">View all first-aid topics →</a>
+      </div>
+      <div class="firstaid-grid">
+        <a class="firstaid-card" href="first-aid.html#severe-bleeding"><div class="card"><h3>Severe Bleeding</h3></div></a>
+        <a class="firstaid-card" href="first-aid.html#burns"><div class="card"><h3>Burns</h3></div></a>
+        <a class="firstaid-card" href="first-aid.html#choking"><div class="card"><h3>Choking</h3></div></a>
+        <a class="firstaid-card" href="first-aid.html#fainting"><div class="card"><h3>Fainting</h3></div></a>
+        <a class="firstaid-card" href="first-aid.html#seizure"><div class="card"><h3>Seizure</h3></div></a>
+        <a class="firstaid-card" href="first-aid.html#suspected-stroke"><div class="card"><h3>Suspected Stroke</h3></div></a>
+        <a class="firstaid-card" href="first-aid.html#severe-allergic-reaction"><div class="card"><h3>Serious Allergic Reaction</h3></div></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="section-tight" id="about">
+    <div class="wrap-narrow">
+      <h2>About SympGuard AI</h2>
+      <p class="muted">SympGuard AI is a symptom-assessment assistant built to help people organize what they're experiencing before talking to a clinician — not to replace one. It combines a curated medical knowledge base, a deterministic safety engine, and an optional AI explanation layer that works even without any AI API key configured.</p>
+      <p class="muted">It was built as a hackathon project. The knowledge base and first-aid content are structured educational scaffolds — see the Evidence section of any result for exactly what is and isn't verified.</p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <a href="index.html" class="brand-mark"><span class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 9 8 11 4.6-2 8-6 8-11V5l-8-3Z"/></svg></span>SympGuard AI</a>
+        <p class="faint" style="max-width:320px; margin-top:var(--space-3);">Educational guidance only — not a medical diagnosis.</p>
+      </div>
+      <nav aria-label="Footer">
+        <ul>
+          <li><a href="app.html">Check My Symptoms</a></li>
+          <li><a href="first-aid.html">First Aid</a></li>
+          <li><a href="emergency.html">Emergency Help</a></li>
+          <li><a href="#about">About</a></li>
+          <li><a href="#safety">Safety &amp; Privacy</a></li>
+        </ul>
+      </nav>
+    </div>
+    <p class="foot-disclaimer">This tool provides general information only and is not a medical diagnosis. Always consult a qualified healthcare provider for medical advice, and call your local emergency number for urgent symptoms.</p>
+  </div>
+</footer>
+
+<script src="js/config.js"></script>
+<script>
+  document.getElementById('nav-toggle').addEventListener('click', function () {
+    var nav = document.getElementById('main-nav');
+    var open = nav.classList.toggle('open');
+    this.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+</script>
+</body>
+</html>

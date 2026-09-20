@@ -1,0 +1,53 @@
+{
+  "_meta": {
+    "note": "Configuration only -- no code changes needed to add a region. Numbers are shown to the user with 'Call' links (tel:); the app never dials anything itself and never claims to dispatch help. Verify numbers periodically -- they can change (e.g. India's mental-health helpline moved from the 'KIRAN' 1800-599-0019 number to the Tele-MANAS 14416 / 1800-891-4416 line in the years after KIRAN's 2020 launch)."
+  },
+  "default_region": "IN-TN",
+  "regions": {
+    "IN-TN": {
+      "label": "India \u2014 Tamil Nadu (hackathon demo configuration)",
+      "general": [
+        {"name": "Emergency (police / fire / ambulance)", "number": "112"},
+        {"name": "Ambulance", "number": "108"}
+      ],
+      "mental_health_crisis": [
+        {"name": "Tele MANAS (national mental health helpline, 24/7, multilingual)", "number": "14416"}
+      ]
+    },
+    "IN": {
+      "label": "India (national)",
+      "general": [
+        {"name": "Emergency (police / fire / ambulance)", "number": "112"},
+        {"name": "Ambulance", "number": "108"}
+      ],
+      "mental_health_crisis": [
+        {"name": "Tele MANAS (national mental health helpline, 24/7, multilingual)", "number": "14416"}
+      ]
+    },
+    "US": {
+      "label": "United States",
+      "general": [
+        {"name": "Emergency", "number": "911"}
+      ],
+      "mental_health_crisis": [
+        {"name": "988 Suicide & Crisis Lifeline", "number": "988"}
+      ]
+    },
+    "UK": {
+      "label": "United Kingdom",
+      "general": [
+        {"name": "Emergency", "number": "999"},
+        {"name": "Non-emergency medical advice (NHS 111)", "number": "111"}
+      ],
+      "mental_health_crisis": [
+        {"name": "Samaritans", "number": "116123"}
+      ]
+    },
+    "OTHER": {
+      "label": "Other / unlisted region",
+      "general": [],
+      "mental_health_crisis": [],
+      "fallback_message": "We don't have a configured emergency number for your region yet. Please use your local emergency number, or search '[your country] emergency number' now."
+    }
+  }
+}

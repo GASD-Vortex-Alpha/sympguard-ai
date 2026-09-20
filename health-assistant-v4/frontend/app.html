@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Symptom Check — SympGuard AI</title>
+<meta name="description" content="Describe your symptoms, answer a few adaptive questions, and get an explainable, safety-checked assessment.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27%3E%3Ctext y=%2720%27 font-size=%2720%27%3E%F0%9F%9B%A1%EF%B8%8F%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/styles.css">
+<style>
+  .app-shell { max-width: 760px; margin: 0 auto; padding: var(--space-7) var(--space-5) var(--space-8); }
+  .step-indicator { display: flex; gap: var(--space-2); margin-bottom: var(--space-6); }
+  .step-indicator span { height: 4px; flex: 1; background: var(--border); border-radius: 4px; }
+  .step-indicator span.active { background: var(--brand); }
+  .step-indicator span.done { background: var(--brand); opacity: 0.5; }
+
+  .view { display: none; }
+  .view.active { display: block; }
+
+  .char-count { text-align: right; font-size: 0.85rem; color: var(--ink-faint); margin-top: var(--space-2); }
+
+  .question-card { padding: var(--space-6); }
+  .question-card h2 { font-size: 1.3rem; }
+  .option-group { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-4); }
+  .option-btn {
+    font: inherit; font-size: 0.95rem; padding: 0.7rem 1.15rem; border-radius: var(--radius-md);
+    border: 1.5px solid var(--border-strong); background: var(--surface); color: var(--ink); cursor: pointer;
+  }
+  .option-btn:hover { border-color: var(--brand); }
+  .option-btn[aria-pressed="true"] { background: var(--brand); border-color: var(--brand); color: #fff; }
+  .question-meta { font-size: 0.85rem; color: var(--ink-faint); margin-bottom: var(--space-2); }
+
+  .loading-view { text-align: center; padding: var(--space-8) 0; }
+  .loading-view .spinner { margin: 0 auto var(--space-4); width: 32px; height: 32px; border-width: 3px; }
+
+  .emergency-banner {
+    background: var(--emergency-bg); border: 2px solid var(--emergency-border); border-radius: var(--radius-lg);
+    padding: var(--space-6); margin-bottom: var(--space-6);
+  }
+  .emergency-banner h2 { color: var(--emergency); }
+  .emergency-banner .call-row { display: flex; gap: var(--space-3); flex-wrap: wrap; margin-top: var(--space-4); }
+
+  .result-section { margin-bottom: var(--space-6); }
+  .result-section h3 { font-size: 0.82rem; letter-spacing: 0.04em; color: var(--ink-faint); margin-bottom: var(--space-3); text-transform: uppercase; }
+  .result-section .card { padding: var(--space-5); }
+
+  .match-item { padding: var(--space-4) 0; border-bottom: 1px solid var(--border); }
+  .match-item:last-child { border-bottom: none; }
+  .match-item .match-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-3); }
+  .match-item .match-head strong { font-size: 1.02rem; }
+  .match-item .confidence { font-size: 0.82rem; color: var(--ink-faint); white-space: nowrap; }
+  .chip { display: inline-block; font-size: 0.78rem; background: var(--surface-sunken); color: var(--ink-soft); padding: 0.2em 0.6em; border-radius: 999px; margin: 0.2em 0.3em 0 0; }
+
+  .qa-list { list-style: none; padding: 0; margin: 0; }
+  .qa-list li { padding: var(--space-3) 0; border-bottom: 1px solid var(--border); }
+  .qa-list li:last-child { border-bottom: none; }
+  .qa-list .q { font-size: 0.88rem; color: var(--ink-soft); }
+  .qa-list .a { font-weight: 600; }
+
+  .evidence-item { padding: var(--space-4) 0; border-bottom: 1px solid var(--border); }
+  .evidence-item:last-child { border-bottom: none; }
+  .evidence-disclosure { font-size: 0.85rem; color: var(--ink-faint); margin-top: var(--space-2); }
+
+  .fa-suggest-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--space-3); }
+
+  #doctor-summary-modal {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: none; align-items: center; justify-content: center;
+    padding: var(--space-5); z-index: 50;
+  }
+  #doctor-summary-modal.open { display: flex; }
+  .modal-card { background: var(--surface); border-radius: var(--radius-lg); max-width: 640px; width: 100%; max-height: 85vh; overflow-y: auto; padding: var(--space-6); }
+  .modal-card pre { white-space: pre-wrap; font-family: inherit; font-size: 0.92rem; background: var(--surface-sunken); padding: var(--space-4); border-radius: var(--radius-md); }
+  .modal-actions { display: flex; gap: var(--space-3); flex-wrap: wrap; margin-top: var(--space-4); }
+
+  .error-card { border-color: var(--emergency-border); background: var(--emergency-bg); }
+  .error-card h3 { color: var(--emergency); }
+
+  @media print {
+    .site-header, .site-footer, .app-shell > *:not(#view-results), .step-indicator, .fa-suggest-grid, #doctor-summary-modal .modal-actions { display: none !important; }
+  }
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+
+<header class="site-header">
+  <div class="wrap">
+    <a href="index.html" class="brand-mark">
+      <span class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 9 8 11 4.6-2 8-6 8-11V5l-8-3Z"/></svg></span>
+      SympGuard AI
+    </a>
+    <nav class="main-nav" id="main-nav">
+      <ul>
+        <li><a href="index.html#how-it-works">How It Works</a></li>
+        <li><a href="index.html#safety">Safety</a></li>
+        <li><a href="first-aid.html">First Aid</a></li>
+        <li><a href="emergency.html">Emergency Help</a></li>
+        <li><a href="index.html#about">About</a></li>
+      </ul>
+    </nav>
+    <div class="row" style="align-items:center; gap: var(--space-3);">
+      <button class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="main-nav" aria-label="Toggle navigation menu">☰</button>
+    </div>
+  </div>
+</header>
+
+<main id="main" class="app-shell">
+  <div class="step-indicator" id="step-indicator" aria-hidden="true">
+    <span id="step-1"></span><span id="step-2"></span><span id="step-3"></span>
+  </div>
+
+  <!-- STEP 1: symptom input -->
+  <section class="view active" id="view-input">
+    <h1>What are you experiencing?</h1>
+    <p class="muted">Describe your symptoms in your own words — when they started, how severe they are, and anything else that stands out.</p>
+    <div class="card" style="margin-top:var(--space-5);">
+      <label for="symptom-text">Symptom description</label>
+      <textarea id="symptom-text" rows="5" placeholder="e.g. I've had a throbbing headache since this morning, it's moderate, and I also feel a bit nauseous..." maxlength="1000"></textarea>
+      <div class="char-count"><span id="char-count">0</span>/1000</div>
+      <p id="input-error" class="faint" style="color:var(--emergency); display:none;">Please enter at least 3 characters describing your symptoms.</p>
+      <button class="btn btn-primary btn-lg btn-block" id="start-btn" style="margin-top:var(--space-4);">Continue</button>
+    </div>
+    <p class="faint" style="margin-top:var(--space-4);">🛈 Educational guidance only — not a medical diagnosis. If this is an emergency, <a href="emergency.html">go to Emergency Help</a> now.</p>
+  </section>
+
+  <!-- STEP 2: adaptive questions -->
+  <section class="view" id="view-questions">
+    <div class="card question-card" id="question-card"></div>
+  </section>
+
+  <!-- Loading -->
+  <section class="view" id="view-loading">
+    <div class="loading-view">
+      <div class="spinner" role="status" aria-label="Loading"></div>
+      <p id="loading-message" class="muted">Working on it…</p>
+    </div>
+  </section>
+
+  <!-- Error -->
+  <section class="view" id="view-error">
+    <div class="card error-card">
+      <h3 id="error-title">Something went wrong</h3>
+      <p class="muted" id="error-message">Please try again.</p>
+      <button class="btn btn-secondary" id="error-retry-btn">Try again</button>
+      <button class="btn btn-secondary" id="error-restart-btn">Start over</button>
+    </div>
+  </section>
+
+  <!-- STEP 3: results -->
+  <section class="view" id="view-results"></section>
+</main>
+
+<div id="doctor-summary-modal" role="dialog" aria-modal="true" aria-label="Doctor-ready summary">
+  <div class="modal-card">
+    <h2>Doctor-Ready Summary</h2>
+    <p class="faint">Not a medical record — a starting point for your conversation with a clinician.</p>
+    <pre id="doctor-summary-text"></pre>
+    <div class="modal-actions">
+      <button class="btn btn-primary" id="copy-summary-btn">Copy Summary</button>
+      <button class="btn btn-secondary" id="print-summary-btn">Print Summary</button>
+      <button class="btn btn-secondary" id="close-summary-btn">Close</button>
+    </div>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <p class="foot-disclaimer" id="disclaimer-text">This tool provides general information only and is not a medical diagnosis. Always consult a qualified healthcare provider for medical advice, and call your local emergency number for urgent symptoms.</p>
+  </div>
+</footer>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

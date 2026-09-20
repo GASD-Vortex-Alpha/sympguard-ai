@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Emergency Help — SympGuard AI</title>
+<meta name="description" content="Emergency contact numbers and safety information. If you believe you are in immediate danger, contact emergency services now.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27%3E%3Ctext y=%2720%27 font-size=%2720%27%3E%F0%9F%9B%A1%EF%B8%8F%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/styles.css">
+<style>
+  .emergency-hero { background: var(--emergency-bg); border: 1px solid var(--emergency-border); border-radius: var(--radius-lg); padding: var(--space-6); }
+  .emergency-hero h1 { color: var(--emergency); }
+  .call-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-4); margin-top: var(--space-5); }
+  .call-btn {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-1);
+    background: var(--emergency); color: #fff; text-decoration: none; border-radius: var(--radius-lg);
+    padding: var(--space-5); text-align: center;
+  }
+  .call-btn:hover { filter: brightness(0.93); }
+  .call-btn .num { font-size: 1.8rem; font-weight: 800; }
+  .call-btn .label { font-size: 0.9rem; opacity: 0.9; }
+  .region-select { margin-top: var(--space-5); display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
+  .region-select select { font: inherit; padding: 0.6rem 0.9rem; border-radius: var(--radius-md); border: 1.5px solid var(--border-strong); background: var(--surface); color: var(--ink); }
+  .mh-card { border: 1px solid var(--routine-border); background: var(--routine-bg); border-radius: var(--radius-lg); padding: var(--space-5); margin-top: var(--space-6); }
+  .mh-card h2 { color: var(--routine); font-size: 1.15rem; }
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+
+<header class="site-header">
+  <div class="wrap">
+    <a href="index.html" class="brand-mark">
+      <span class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 9 8 11 4.6-2 8-6 8-11V5l-8-3Z"/></svg></span>
+      SympGuard AI
+    </a>
+    <nav class="main-nav" id="main-nav">
+      <ul>
+        <li><a href="index.html#how-it-works">How It Works</a></li>
+        <li><a href="index.html#safety">Safety</a></li>
+        <li><a href="first-aid.html">First Aid</a></li>
+        <li><a href="emergency.html" aria-current="page">Emergency Help</a></li>
+        <li><a href="index.html#about">About</a></li>
+      </ul>
+    </nav>
+    <div class="row" style="align-items:center; gap: var(--space-3);">
+      <a class="btn btn-primary header-cta" href="app.html">Check My Symptoms</a>
+      <button class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="main-nav" aria-label="Toggle navigation menu">☰</button>
+    </div>
+  </div>
+</header>
+
+<main id="main" class="section-tight">
+  <div class="wrap-narrow">
+
+    <div class="emergency-hero">
+      <h1>Possible Medical Emergency?</h1>
+      <p class="muted">If you believe you are in immediate danger, contact emergency services now. SympGuard AI cannot dispatch help — it can only show you who to call.</p>
+
+      <div class="region-select">
+        <label for="region-picker" style="margin:0;">Region:</label>
+        <select id="region-picker"></select>
+      </div>
+
+      <div class="call-grid" id="call-grid">
+        <div class="skeleton" style="height:110px;"></div>
+        <div class="skeleton" style="height:110px;"></div>
+      </div>
+
+      <p style="margin-top:var(--space-5);"><a href="first-aid.html" class="btn btn-secondary">View First Aid</a></p>
+    </div>
+
+    <div class="mh-card" id="mh-card" style="display:none;">
+      <h2>In an emotional crisis?</h2>
+      <p class="muted">If you're struggling, having thoughts of suicide, or supporting someone who is, help is available and confidential.</p>
+      <div id="mh-numbers" class="call-grid"></div>
+    </div>
+
+    <div class="card" style="margin-top: var(--space-6);">
+      <h2>How SympGuard AI checks for emergencies</h2>
+      <p class="muted">A deterministic safety check runs on everything you type — separately from, and prioritized over, any AI-generated explanation. It cannot be talked out of flagging an emergency by anything else in the system. It is also <strong>not medically exhaustive</strong>: it can miss rare presentations or unfamiliar wording, and it can also flag things conservatively that turn out to be less serious. If something feels seriously wrong, trust yourself over the tool.</p>
+    </div>
+
+    <p class="faint" style="margin-top:var(--space-5);">Emergency numbers are configuration, not hardcoded — see <code>backend/emergency_contacts.json</code>. Numbers shown here are best-effort and may change; verify your local emergency number independently if unsure.</p>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <p class="foot-disclaimer">This tool provides general information only and is not a medical diagnosis. Always consult a qualified healthcare provider for medical advice, and call your local emergency number for urgent symptoms.</p>
+  </div>
+</footer>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script>
+  function escapeHtml(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+  function renderContacts(data) {
+    var grid = document.getElementById('call-grid');
+    if (!data.general.length) {
+      grid.innerHTML = '<p class="muted">' + escapeHtml(data.fallback_message || "No configured number for this region.") + '</p>';
+    } else {
+      grid.innerHTML = data.general.map(function (c) {
+        return '<a class="call-btn" href="tel:' + encodeURIComponent(c.number) + '"><span class="num">' + escapeHtml(c.number) + '</span><span class="label">' + escapeHtml(c.name) + '</span></a>';
+      }).join('');
+    }
+
+    var mhCard = document.getElementById('mh-card');
+    var mhNumbers = document.getElementById('mh-numbers');
+    if (data.mental_health_crisis && data.mental_health_crisis.length) {
+      mhCard.style.display = '';
+      mhNumbers.innerHTML = data.mental_health_crisis.map(function (c) {
+        return '<a class="call-btn" style="background:var(--routine);" href="tel:' + encodeURIComponent(c.number) + '"><span class="num">' + escapeHtml(c.number) + '</span><span class="label">' + escapeHtml(c.name) + '</span></a>';
+      }).join('');
+    } else {
+      mhCard.style.display = 'none';
+    }
+  }
+
+  function loadRegion(code) {
+    SympGuardAPI.getEmergencyContacts(code).then(renderContacts).catch(function (err) {
+      document.getElementById('call-grid').innerHTML = '<p class="muted">Could not load emergency contacts: ' + escapeHtml(err.message) + '</p>';
+    });
+  }
+
+  SympGuardAPI.getRegions().then(function (regions) {
+    var select = document.getElementById('region-picker');
+    select.innerHTML = regions.map(function (r) {
+      return '<option value="' + escapeHtml(r.code) + '">' + escapeHtml(r.label) + '</option>';
+    }).join('');
+    select.value = window.SYMPGUARD_CONFIG.DEFAULT_REGION;
+    select.addEventListener('change', function () { loadRegion(this.value); });
+    loadRegion(select.value);
+  }).catch(function () {
+    loadRegion(window.SYMPGUARD_CONFIG.DEFAULT_REGION);
+  });
+
+  document.getElementById('nav-toggle').addEventListener('click', function () {
+    var nav = document.getElementById('main-nav');
+    var open = nav.classList.toggle('open');
+    this.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+</script>
+</body>
+</html>

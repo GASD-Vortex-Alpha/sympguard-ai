@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>First Aid — SympGuard AI</title>
+<meta name="description" content="Curated, structured first-aid guidance for common emergency situations.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27%3E%3Ctext y=%2720%27 font-size=%2720%27%3E%F0%9F%9B%A1%EF%B8%8F%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/styles.css">
+<style>
+  .fa-layout { display: grid; grid-template-columns: 260px 1fr; gap: var(--space-6); align-items: start; }
+  .fa-nav { position: sticky; top: 88px; display: flex; flex-direction: column; gap: var(--space-1); }
+  .fa-nav button {
+    text-align: left; background: none; border: none; padding: 0.65rem 0.85rem; border-radius: var(--radius-sm);
+    font: inherit; color: var(--ink-soft); cursor: pointer; font-size: 0.95rem;
+  }
+  .fa-nav button:hover { background: var(--surface-sunken); color: var(--ink); }
+  .fa-nav button[aria-current="true"] { background: var(--brand-light); color: var(--brand-dark); font-weight: 600; }
+
+  .fa-detail-header { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-4); margin-bottom: var(--space-5); }
+  .fa-columns { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5); margin: var(--space-5) 0; }
+  .fa-col h3 { font-size: 0.85rem; letter-spacing: 0.03em; margin-bottom: var(--space-3); }
+  .fa-col.do h3 { color: var(--selfcare); }
+  .fa-col.avoid h3 { color: var(--emergency); }
+  .fa-col.help h3 { color: var(--urgent); }
+  .fa-col ol, .fa-col ul { margin: 0; padding-left: 1.1em; }
+  .fa-col li { margin-bottom: var(--space-2); }
+  .fa-source { font-size: 0.85rem; color: var(--ink-faint); border-top: 1px solid var(--border); padding-top: var(--space-4); margin-top: var(--space-4); }
+  .fa-emergency-note { background: var(--emergency-bg); border: 1px solid var(--emergency-border); border-radius: var(--radius-md); padding: var(--space-4); margin-top: var(--space-5); }
+
+  @media (max-width: 820px) {
+    .fa-layout { grid-template-columns: 1fr; }
+    .fa-nav { position: static; flex-direction: row; overflow-x: auto; padding-bottom: var(--space-2); }
+    .fa-nav button { white-space: nowrap; }
+    .fa-columns { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+
+<header class="site-header">
+  <div class="wrap">
+    <a href="index.html" class="brand-mark">
+      <span class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 9 8 11 4.6-2 8-6 8-11V5l-8-3Z"/></svg></span>
+      SympGuard AI
+    </a>
+    <nav class="main-nav" id="main-nav">
+      <ul>
+        <li><a href="index.html#how-it-works">How It Works</a></li>
+        <li><a href="index.html#safety">Safety</a></li>
+        <li><a href="first-aid.html" aria-current="page">First Aid</a></li>
+        <li><a href="emergency.html">Emergency Help</a></li>
+        <li><a href="index.html#about">About</a></li>
+      </ul>
+    </nav>
+    <div class="row" style="align-items:center; gap: var(--space-3);">
+      <a class="btn btn-primary header-cta" href="app.html">Check My Symptoms</a>
+      <button class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="main-nav" aria-label="Toggle navigation menu">☰</button>
+    </div>
+  </div>
+</header>
+
+<main id="main" class="section-tight">
+  <div class="wrap">
+    <h1>First Aid</h1>
+    <p class="muted" style="max-width:640px;">Conservative, curated guidance for common emergency situations — not a substitute for certified first-aid training. In any real emergency, call emergency services first.</p>
+
+    <div id="fa-loading" class="stack" style="margin-top:var(--space-6);">
+      <div class="skeleton" style="height:24px;width:40%;"></div>
+      <div class="skeleton" style="height:200px;"></div>
+    </div>
+
+    <div id="fa-error" class="card" style="display:none; border-color:var(--emergency-border); background:var(--emergency-bg); margin-top:var(--space-6);">
+      <h3 style="color:var(--emergency);">Couldn't load first-aid content</h3>
+      <p class="muted" id="fa-error-message">Check that the SympGuard AI backend is running and reachable.</p>
+      <button class="btn btn-secondary" onclick="loadTopics()">Try again</button>
+    </div>
+
+    <div id="fa-content" class="fa-layout" style="display:none; margin-top:var(--space-6);">
+      <nav class="fa-nav" id="fa-nav" aria-label="First-aid topics"></nav>
+      <div class="card" id="fa-detail"></div>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <p class="foot-disclaimer">This tool provides general information only and is not a medical diagnosis. Always consult a qualified healthcare provider for medical advice, and call your local emergency number for urgent symptoms.</p>
+  </div>
+</footer>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script>
+  var topicsCache = [];
+
+  function renderNav(topics, activeId) {
+    var nav = document.getElementById('fa-nav');
+    nav.innerHTML = '';
+    topics.forEach(function (t) {
+      var btn = document.createElement('button');
+      btn.textContent = t.topic;
+      btn.setAttribute('aria-current', String(t.id === activeId));
+      btn.addEventListener('click', function () { selectTopic(t.id); });
+      nav.appendChild(btn);
+    });
+  }
+
+  function renderDetail(detail) {
+    var el = document.getElementById('fa-detail');
+    el.innerHTML =
+      '<div class="fa-detail-header"><div><h2 style="margin-bottom:4px;">' + escapeHtml(detail.topic) + '</h2>' +
+      '<p class="muted" style="margin:0;">' + escapeHtml(detail.summary) + '</p></div></div>' +
+      '<div class="fa-columns">' +
+        '<div class="fa-col do"><h3>DO NOW</h3><ol>' + detail.immediate_steps.map(function(s){return '<li>'+escapeHtml(s)+'</li>';}).join('') + '</ol></div>' +
+        '<div class="fa-col avoid"><h3>AVOID</h3><ul>' + detail.avoid.map(function(s){return '<li>'+escapeHtml(s)+'</li>';}).join('') + '</ul></div>' +
+        '<div class="fa-col help"><h3>GET HELP IF</h3><ul>' + detail.when_to_call_emergency.map(function(s){return '<li>'+escapeHtml(s)+'</li>';}).join('') + '</ul></div>' +
+      '</div>' +
+      '<div class="fa-emergency-note"><strong>In doubt? Call emergency services.</strong> <a href="emergency.html">View emergency contacts →</a></div>' +
+      '<div class="fa-source">Source: ' + escapeHtml(detail.source) + ' · Last reviewed: ' + escapeHtml(detail.last_reviewed) + '</div>';
+  }
+
+  function escapeHtml(s) {
+    var d = document.createElement('div'); d.textContent = s; return d.innerHTML;
+  }
+
+  function selectTopic(id) {
+    history.replaceState(null, '', '#' + id);
+    renderNav(topicsCache, id);
+    SympGuardAPI.getFirstAid(id).then(renderDetail).catch(function (err) {
+      document.getElementById('fa-detail').innerHTML = '<p class="muted">Could not load this topic: ' + escapeHtml(err.message) + '</p>';
+    });
+  }
+
+  function loadTopics() {
+    document.getElementById('fa-loading').style.display = '';
+    document.getElementById('fa-error').style.display = 'none';
+    document.getElementById('fa-content').style.display = 'none';
+
+    SympGuardAPI.listFirstAid().then(function (topics) {
+      topicsCache = topics;
+      document.getElementById('fa-loading').style.display = 'none';
+      document.getElementById('fa-content').style.display = '';
+      var initial = (location.hash || '').replace('#', '') || (topics[0] && topics[0].id);
+      if (!topics.find(function (t) { return t.id === initial; })) initial = topics[0] && topics[0].id;
+      if (initial) selectTopic(initial);
+    }).catch(function (err) {
+      document.getElementById('fa-loading').style.display = 'none';
+      document.getElementById('fa-error').style.display = '';
+      document.getElementById('fa-error-message').textContent = err.message;
+    });
+  }
+
+  document.getElementById('nav-toggle').addEventListener('click', function () {
+    var nav = document.getElementById('main-nav');
+    var open = nav.classList.toggle('open');
+    this.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+
+  loadTopics();
+</script>
+</body>
+</html>

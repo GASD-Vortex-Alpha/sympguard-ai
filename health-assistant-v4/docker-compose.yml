@@ -1,0 +1,41 @@
+version: "3.9"
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://healthuser:healthpass@db:5432/healthdb
+      - JWT_SECRET_KEY=change_this_to_a_long_random_secret_in_production
+      - CORS_ORIGINS=*
+      # Optional -- leave unset to run fully in DEMO_MODE (no AI API calls, deterministic fallback explanations)
+      - ANTHROPIC_API_KEY=
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=healthuser
+      - POSTGRES_PASSWORD=healthpass
+      - POSTGRES_DB=healthdb
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+  frontend:
+    image: nginx:alpine
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  pgdata:

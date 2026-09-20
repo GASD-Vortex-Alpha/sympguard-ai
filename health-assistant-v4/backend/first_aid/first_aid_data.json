@@ -1,0 +1,193 @@
+{
+  "_meta": {
+    "note": "Conservative, general first-aid guidance consistent with widely-published public first-aid education (e.g. Red Cross / WHO style lay-person guidance). This is NOT a substitute for a certified first-aid/CPR course, and has not been reviewed by a licensed clinician for this project. No drug names, no dosages, no invasive procedures. If in doubt in a real situation, call emergency services first and follow their instructions.",
+    "last_reviewed": "2026-09",
+    "fields": {
+      "topic": "display name",
+      "id": "slug, used in the API path /api/first-aid/{id}",
+      "summary": "one-line description shown on the preview card",
+      "immediate_steps": "ordered DO NOW steps",
+      "avoid": "things NOT to do",
+      "when_to_call_emergency": "clear triggers to escalate",
+      "source": "honest attribution -- see note above",
+      "last_reviewed": "when this entry's text was last drafted/checked"
+    }
+  },
+  "topics": [
+    {
+      "id": "severe-bleeding",
+      "topic": "Severe Bleeding",
+      "summary": "Firm direct pressure controls most severe bleeding until help arrives.",
+      "immediate_steps": [
+        "Call emergency services (or have someone else call) right away.",
+        "Apply firm, direct pressure on the wound with a clean cloth, bandage, or your hand.",
+        "Keep steady pressure on — do not lift the cloth to check, add more layers on top if it soaks through.",
+        "If possible, raise the injured area above the level of the heart.",
+        "Keep the person still, warm, and lying down if they feel faint."
+      ],
+      "avoid": [
+        "Do not remove any object that is embedded in the wound.",
+        "Do not remove the cloth once pressure is applied — add more on top instead.",
+        "Do not apply a tourniquet unless you are trained to use one and bleeding cannot be controlled any other way."
+      ],
+      "when_to_call_emergency": [
+        "Bleeding that won't stop or slow with firm pressure",
+        "Spurting or pooling blood",
+        "The person becomes pale, faint, confused, or loses consciousness"
+      ],
+      "source": "General public first-aid education (Red Cross / WHO style guidance)",
+      "last_reviewed": "2026-09"
+    },
+    {
+      "id": "burns",
+      "topic": "Burns",
+      "summary": "Cool the burn with running water; don't use ice, butter, or ointments.",
+      "immediate_steps": [
+        "Move the person away from the source of the burn.",
+        "Cool the burn under cool (not ice-cold) running water for 10-20 minutes.",
+        "Remove tight clothing or jewelry near the burn before it swells, unless it's stuck to the skin.",
+        "Cover loosely with a clean, non-fluffy cloth or cling film.",
+        "Keep the person warm and comfortable while cooling the burn."
+      ],
+      "avoid": [
+        "Do not apply ice directly, butter, oil, or toothpaste to a burn.",
+        "Do not pop any blisters.",
+        "Do not pull off clothing that is stuck to the burned skin."
+      ],
+      "when_to_call_emergency": [
+        "Large burns, or a burn on the face, hands, feet, groin, or a major joint",
+        "Deep burns (white, leathery, or charred-looking skin)",
+        "Burns from chemicals, electricity, or fire in an enclosed space",
+        "The person is a young child, elderly, or has trouble breathing"
+      ],
+      "source": "General public first-aid education (Red Cross / WHO style guidance)",
+      "last_reviewed": "2026-09"
+    },
+    {
+      "id": "choking",
+      "topic": "Choking",
+      "summary": "Encourage coughing first; escalate to back blows and abdominal thrusts if the airway stays blocked.",
+      "immediate_steps": [
+        "If the person can cough or speak, encourage them to keep coughing — don't intervene yet.",
+        "If they cannot cough, speak, or breathe: call emergency services immediately.",
+        "Lean the person forward and give up to 5 firm back blows between the shoulder blades with the heel of your hand.",
+        "If that doesn't clear it, and you are trained, give up to 5 abdominal thrusts (Heimlich maneuver).",
+        "Alternate 5 back blows and 5 abdominal thrusts until the object is cleared or emergency help arrives.",
+        "If the person becomes unconscious, lower them to the ground and begin CPR if you are trained, and ensure emergency services are on the way."
+      ],
+      "avoid": [
+        "Do not do abdominal thrusts on infants under 1 year — use back blows and chest thrusts instead, and get trained guidance before attempting this on an infant.",
+        "Do not perform abdominal thrusts if you have not been shown how — call for emergency help and continue back blows.",
+        "Do not put your fingers blindly into the mouth to try to grab the object."
+      ],
+      "when_to_call_emergency": [
+        "The person cannot breathe, cough, or make sound",
+        "Lips or face start turning blue",
+        "The obstruction does not clear after first-aid attempts",
+        "The person loses consciousness"
+      ],
+      "source": "General public first-aid education (Red Cross / WHO style guidance)",
+      "last_reviewed": "2026-09"
+    },
+    {
+      "id": "fainting",
+      "topic": "Fainting",
+      "summary": "Lay the person down and raise their legs; most fainting resolves within a minute.",
+      "immediate_steps": [
+        "Help the person lie down flat and raise their legs about 12 inches (30 cm) if possible.",
+        "Loosen any tight clothing around the neck.",
+        "Check that they are breathing normally.",
+        "Once they come around, have them rest lying down for a few minutes before sitting up slowly.",
+        "Give water once they are fully alert, if they can swallow safely."
+      ],
+      "avoid": [
+        "Do not sit the person up or stand them up quickly.",
+        "Do not give food or water while they are still drowsy or not fully alert.",
+        "Do not leave them alone until they've fully recovered."
+      ],
+      "when_to_call_emergency": [
+        "They don't regain consciousness within about a minute",
+        "They were injured in a fall",
+        "Fainting is accompanied by chest pain, irregular heartbeat, confusion, or difficulty breathing",
+        "It happens repeatedly, or during pregnancy"
+      ],
+      "source": "General public first-aid education (Red Cross / WHO style guidance)",
+      "last_reviewed": "2026-09"
+    },
+    {
+      "id": "seizure",
+      "topic": "Seizure",
+      "summary": "Protect from injury, cushion the head, and time it — most seizures stop on their own within a couple of minutes.",
+      "immediate_steps": [
+        "Stay calm and stay with the person for the whole seizure.",
+        "Clear the area of anything hard or sharp they could hit.",
+        "Cushion their head with something soft.",
+        "Time the seizure from when it starts.",
+        "Once the jerking stops, gently roll them onto their side (recovery position) and check breathing.",
+        "Stay with them until they are fully alert, and speak calmly and reassuringly as they come around."
+      ],
+      "avoid": [
+        "Do not hold the person down or try to stop their movements.",
+        "Do not put anything in their mouth — they cannot swallow their tongue, and this can cause injury.",
+        "Do not give food, water, or anything by mouth until they are fully alert."
+      ],
+      "when_to_call_emergency": [
+        "The seizure lasts longer than 5 minutes",
+        "A second seizure starts soon after the first",
+        "The person does not regain consciousness or normal breathing afterward",
+        "It's their first-ever seizure, it happened in water, or they are pregnant or injured"
+      ],
+      "source": "General public first-aid education (Red Cross / WHO style guidance)",
+      "last_reviewed": "2026-09"
+    },
+    {
+      "id": "suspected-stroke",
+      "topic": "Suspected Stroke",
+      "summary": "Use FAST — Face, Arms, Speech, Time. Call emergency services immediately if any sign is present.",
+      "immediate_steps": [
+        "Check FAST: Face — does one side droop when they smile? Arms — can they raise both arms evenly? Speech — is it slurred or strange?",
+        "If any of these signs are present, call emergency services immediately — Time matters, note when symptoms started.",
+        "Keep the person still, calm, and comfortable while waiting for help.",
+        "If they are unconscious but breathing, place them in the recovery position on their side."
+      ],
+      "avoid": [
+        "Do not give them food, water, or any medication.",
+        "Do not let them drive themselves or wait to 'see if it passes' — treat it as a time-critical emergency.",
+        "Do not delay calling for help to see if symptoms improve."
+      ],
+      "when_to_call_emergency": [
+        "Any single FAST sign is present, even if it resolves",
+        "Sudden numbness or weakness, especially on one side",
+        "Sudden confusion, trouble speaking or understanding speech",
+        "Sudden severe headache with no known cause"
+      ],
+      "source": "General public first-aid education (Red Cross / WHO style guidance)",
+      "last_reviewed": "2026-09"
+    },
+    {
+      "id": "severe-allergic-reaction",
+      "topic": "Serious Allergic Reaction (Anaphylaxis)",
+      "summary": "Call emergency services immediately; use an epinephrine auto-injector right away if the person has one.",
+      "immediate_steps": [
+        "Call emergency services immediately.",
+        "If the person has their own prescribed epinephrine auto-injector, help them use it right away, following the device's own instructions.",
+        "Help them into a comfortable position — lying flat with legs raised is often recommended, unless they're having trouble breathing, in which case let them sit up.",
+        "Stay with them and monitor breathing and consciousness until help arrives.",
+        "A second dose of epinephrine (from a second auto-injector, if available) may be needed if there's no improvement after several minutes — follow the device instructions or emergency dispatcher's guidance."
+      ],
+      "avoid": [
+        "Do not wait to see if symptoms improve on their own before calling for help.",
+        "Do not have them stand or walk around.",
+        "Do not give anything by mouth if they are having trouble breathing or swallowing."
+      ],
+      "when_to_call_emergency": [
+        "Swelling of the face, lips, tongue, or throat",
+        "Difficulty breathing or wheezing",
+        "Widespread hives with dizziness or a feeling of impending doom",
+        "Any reaction after a known allergen exposure that's worsening quickly"
+      ],
+      "source": "General public first-aid education (Red Cross / WHO style guidance)",
+      "last_reviewed": "2026-09"
+    }
+  ]
+}

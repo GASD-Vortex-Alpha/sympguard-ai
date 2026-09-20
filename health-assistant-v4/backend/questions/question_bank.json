@@ -1,0 +1,566 @@
+{
+  "_meta": {
+    "note": "Curated, deterministic follow-up questions -- no LLM required to generate or select these. Each topic is triggered when one of its trigger_symptoms is present in the symptoms extracted from the user's initial free-text description (see nlp_extraction.py). Questions are deduplicated by id if more than one triggered topic shares a question. 'if_yes_signal' / 'if_answer_signal' text is fed into the safety engine's final validation pass verbatim -- it must exactly match (or closely match, since matching is order-independent/negation-aware) a phrase the safety engine recognizes, see backend/safety/red_flag_engine.py.",
+    "question_types": "yes_no | choice | scale"
+  },
+  "max_questions_per_session": 6,
+  "questions_per_batch": 2,
+  "generic_intro_questions": [
+    {
+      "id": "onset_timing",
+      "prompt": "When did this start?",
+      "type": "choice",
+      "options": [
+        "Within the last hour",
+        "Today",
+        "1-3 days ago",
+        "More than 3 days ago",
+        "More than 2 weeks ago"
+      ]
+    },
+    {
+      "id": "overall_severity",
+      "prompt": "How severe would you say it is right now?",
+      "type": "choice",
+      "options": [
+        "Mild - barely noticeable",
+        "Moderate - noticeable, manageable",
+        "Severe - hard to ignore or function"
+      ]
+    }
+  ],
+  "topics": [
+    {
+      "topic_id": "headache",
+      "trigger_symptoms": [
+        "headache",
+        "severe headache",
+        "throbbing pain",
+        "migraine",
+        "tension headache"
+      ],
+      "priority_order": [
+        "headache_onset_speed",
+        "headache_worst_ever",
+        "headache_vision",
+        "headache_fever",
+        "headache_vomiting",
+        "headache_neck_stiff",
+        "headache_injury"
+      ],
+      "questions": [
+        {
+          "id": "headache_onset_speed",
+          "prompt": "Did the headache come on suddenly (seconds to minutes) or gradually (over hours)?",
+          "type": "choice",
+          "options": [
+            "Suddenly",
+            "Gradually"
+          ],
+          "if_answer_signal": {
+            "Suddenly": "sudden severe headache"
+          }
+        },
+        {
+          "id": "headache_worst_ever",
+          "prompt": "Is this the worst headache you have ever had?",
+          "type": "yes_no",
+          "critical": true,
+          "critical_answer": "Yes",
+          "if_yes_signal": "worst headache of my life"
+        },
+        {
+          "id": "headache_vision",
+          "prompt": "Any vision changes -- blurred, double, or loss of vision?",
+          "type": "yes_no",
+          "if_yes_signal": "vision changes"
+        },
+        {
+          "id": "headache_fever",
+          "prompt": "Do you also have a fever?",
+          "type": "yes_no",
+          "if_yes_signal": "fever"
+        },
+        {
+          "id": "headache_vomiting",
+          "prompt": "Any vomiting along with the headache?",
+          "type": "yes_no",
+          "if_yes_signal": "vomiting"
+        },
+        {
+          "id": "headache_neck_stiff",
+          "prompt": "Any stiffness in your neck?",
+          "type": "yes_no",
+          "if_yes_signal": "stiff neck"
+        },
+        {
+          "id": "headache_injury",
+          "prompt": "Any recent head injury or fall?",
+          "type": "yes_no"
+        }
+      ]
+    },
+    {
+      "topic_id": "chest_pain",
+      "trigger_symptoms": [
+        "chest pain",
+        "chest pressure",
+        "chest tightness",
+        "pain radiating to arm"
+      ],
+      "priority_order": [
+        "chest_radiating",
+        "chest_breathing",
+        "chest_sweating",
+        "chest_onset",
+        "chest_exertion"
+      ],
+      "questions": [
+        {
+          "id": "chest_radiating",
+          "prompt": "Does the pain spread to your arm, jaw, neck, or back?",
+          "type": "yes_no",
+          "if_yes_signal": "pain radiating to arm"
+        },
+        {
+          "id": "chest_breathing",
+          "prompt": "Any shortness of breath along with the chest pain?",
+          "type": "yes_no",
+          "if_yes_signal": "shortness of breath"
+        },
+        {
+          "id": "chest_sweating",
+          "prompt": "Any cold sweat, nausea, or lightheadedness with it?",
+          "type": "yes_no",
+          "if_yes_signal": "sweating"
+        },
+        {
+          "id": "chest_onset",
+          "prompt": "Did the pain start suddenly?",
+          "type": "yes_no"
+        },
+        {
+          "id": "chest_exertion",
+          "prompt": "Does it get worse with physical activity?",
+          "type": "yes_no"
+        }
+      ]
+    },
+    {
+      "topic_id": "breathing_difficulty",
+      "trigger_symptoms": [
+        "shortness of breath",
+        "difficulty breathing",
+        "cannot breathe",
+        "wheezing"
+      ],
+      "priority_order": [
+        "breathing_severity",
+        "breathing_lips",
+        "breathing_speaking",
+        "breathing_chest_pain",
+        "breathing_trigger"
+      ],
+      "questions": [
+        {
+          "id": "breathing_severity",
+          "prompt": "Can you currently speak in full sentences without gasping for air?",
+          "type": "yes_no",
+          "critical": true,
+          "critical_answer": "No",
+          "if_yes_signal_on_no": "difficulty breathing"
+        },
+        {
+          "id": "breathing_lips",
+          "prompt": "Any blue or grey tint to your lips or fingertips?",
+          "type": "yes_no",
+          "critical": true,
+          "critical_answer": "Yes",
+          "if_yes_signal": "blue lips"
+        },
+        {
+          "id": "breathing_speaking",
+          "prompt": "Do you have a known condition like asthma or COPD?",
+          "type": "yes_no"
+        },
+        {
+          "id": "breathing_chest_pain",
+          "prompt": "Any chest pain along with the breathing difficulty?",
+          "type": "yes_no",
+          "if_yes_signal": "chest pain"
+        },
+        {
+          "id": "breathing_trigger",
+          "prompt": "Did this start after a possible allergen (food, sting, medication)?",
+          "type": "yes_no",
+          "if_yes_signal": "anaphylaxis"
+        }
+      ]
+    },
+    {
+      "topic_id": "fever",
+      "trigger_symptoms": [
+        "fever",
+        "mild fever",
+        "high fever",
+        "chills"
+      ],
+      "priority_order": [
+        "fever_temp",
+        "fever_duration",
+        "fever_neck",
+        "fever_rash",
+        "fever_confusion"
+      ],
+      "questions": [
+        {
+          "id": "fever_temp",
+          "prompt": "Roughly how high is the fever, if you've measured it?",
+          "type": "choice",
+          "options": [
+            "Under 38°C / 100.4°F",
+            "38-39°C / 100.4-102.2°F",
+            "Over 39°C / 102.2°F",
+            "Haven't measured it"
+          ]
+        },
+        {
+          "id": "fever_duration",
+          "prompt": "How many days have you had the fever?",
+          "type": "choice",
+          "options": [
+            "Less than 1 day",
+            "1-3 days",
+            "More than 3 days"
+          ]
+        },
+        {
+          "id": "fever_neck",
+          "prompt": "Any neck stiffness with the fever?",
+          "type": "yes_no",
+          "if_yes_signal": "stiff neck"
+        },
+        {
+          "id": "fever_rash",
+          "prompt": "Any new rash along with the fever?",
+          "type": "yes_no",
+          "if_yes_signal": "rash"
+        },
+        {
+          "id": "fever_confusion",
+          "prompt": "Any confusion or unusual drowsiness?",
+          "type": "yes_no",
+          "if_yes_signal": "confusion"
+        }
+      ]
+    },
+    {
+      "topic_id": "cough",
+      "trigger_symptoms": [
+        "cough",
+        "congestion",
+        "sore throat",
+        "runny nose"
+      ],
+      "priority_order": [
+        "cough_duration",
+        "cough_blood",
+        "cough_breathing",
+        "cough_fever"
+      ],
+      "questions": [
+        {
+          "id": "cough_duration",
+          "prompt": "How long have you had the cough?",
+          "type": "choice",
+          "options": [
+            "Less than a week",
+            "1-3 weeks",
+            "More than 3 weeks"
+          ]
+        },
+        {
+          "id": "cough_blood",
+          "prompt": "Any blood in what you're coughing up?",
+          "type": "yes_no",
+          "critical": true,
+          "critical_answer": "Yes",
+          "if_yes_signal": "severe bleeding"
+        },
+        {
+          "id": "cough_breathing",
+          "prompt": "Any shortness of breath with the cough?",
+          "type": "yes_no",
+          "if_yes_signal": "shortness of breath"
+        },
+        {
+          "id": "cough_fever",
+          "prompt": "Any fever along with the cough?",
+          "type": "yes_no",
+          "if_yes_signal": "fever"
+        }
+      ]
+    },
+    {
+      "topic_id": "abdominal_pain",
+      "trigger_symptoms": [
+        "abdominal pain",
+        "lower abdominal pain",
+        "pelvic pain",
+        "cramping"
+      ],
+      "priority_order": [
+        "abd_location",
+        "abd_severity_sudden",
+        "abd_pregnant",
+        "abd_vomiting",
+        "abd_fever"
+      ],
+      "questions": [
+        {
+          "id": "abd_location",
+          "prompt": "Where is the pain mainly located?",
+          "type": "choice",
+          "options": [
+            "Upper abdomen",
+            "Lower right",
+            "Lower left",
+            "All over / can't tell",
+            "Lower abdomen / pelvis"
+          ]
+        },
+        {
+          "id": "abd_severity_sudden",
+          "prompt": "Did the pain start suddenly and severely?",
+          "type": "yes_no"
+        },
+        {
+          "id": "abd_pregnant",
+          "prompt": "Is there any chance of pregnancy?",
+          "type": "choice",
+          "options": [
+            "Yes",
+            "No",
+            "Not applicable"
+          ],
+          "critical": true,
+          "critical_answer": "Yes",
+          "if_answer_signal": {
+            "Yes": "severe abdominal pain pregnant"
+          }
+        },
+        {
+          "id": "abd_vomiting",
+          "prompt": "Any vomiting along with the pain?",
+          "type": "yes_no",
+          "if_yes_signal": "vomiting"
+        },
+        {
+          "id": "abd_fever",
+          "prompt": "Any fever along with the pain?",
+          "type": "yes_no",
+          "if_yes_signal": "fever"
+        }
+      ]
+    },
+    {
+      "topic_id": "nausea_vomiting",
+      "trigger_symptoms": [
+        "nausea",
+        "vomiting",
+        "loss of appetite"
+      ],
+      "priority_order": [
+        "nv_duration",
+        "nv_blood",
+        "nv_dehydration",
+        "nv_abdominal"
+      ],
+      "questions": [
+        {
+          "id": "nv_duration",
+          "prompt": "How long has this been going on?",
+          "type": "choice",
+          "options": [
+            "Less than a day",
+            "1-2 days",
+            "More than 2 days"
+          ]
+        },
+        {
+          "id": "nv_blood",
+          "prompt": "Any blood in the vomit, or does it look like coffee grounds?",
+          "type": "yes_no",
+          "critical": true,
+          "critical_answer": "Yes",
+          "if_yes_signal": "severe bleeding"
+        },
+        {
+          "id": "nv_dehydration",
+          "prompt": "Are you able to keep any fluids down?",
+          "type": "yes_no"
+        },
+        {
+          "id": "nv_abdominal",
+          "prompt": "Any abdominal pain along with it?",
+          "type": "yes_no",
+          "if_yes_signal": "abdominal pain"
+        }
+      ]
+    },
+    {
+      "topic_id": "dizziness",
+      "trigger_symptoms": [
+        "dizziness",
+        "lightheadedness",
+        "fainting",
+        "loss of consciousness"
+      ],
+      "priority_order": [
+        "dizzy_fainted",
+        "dizzy_chest",
+        "dizzy_weakness",
+        "dizzy_position"
+      ],
+      "questions": [
+        {
+          "id": "dizzy_fainted",
+          "prompt": "Did you actually lose consciousness / faint?",
+          "type": "yes_no",
+          "critical": true,
+          "critical_answer": "Yes",
+          "if_yes_signal": "loss of consciousness"
+        },
+        {
+          "id": "dizzy_chest",
+          "prompt": "Any chest pain or heart palpitations with it?",
+          "type": "yes_no",
+          "if_yes_signal": "chest pain"
+        },
+        {
+          "id": "dizzy_weakness",
+          "prompt": "Any weakness or numbness on one side of your body?",
+          "type": "yes_no",
+          "critical": true,
+          "critical_answer": "Yes",
+          "if_yes_signal": "sudden weakness one side"
+        },
+        {
+          "id": "dizzy_position",
+          "prompt": "Does it mainly happen when you stand up quickly?",
+          "type": "yes_no"
+        }
+      ]
+    },
+    {
+      "topic_id": "rash_skin",
+      "trigger_symptoms": [
+        "rash",
+        "hives",
+        "swelling",
+        "itchy eyes"
+      ],
+      "priority_order": [
+        "rash_breathing",
+        "rash_spread",
+        "rash_trigger",
+        "rash_fever"
+      ],
+      "questions": [
+        {
+          "id": "rash_breathing",
+          "prompt": "Any swelling of the face, lips, or throat, or difficulty breathing?",
+          "type": "yes_no",
+          "critical": true,
+          "critical_answer": "Yes",
+          "if_yes_signal": "swelling of the throat"
+        },
+        {
+          "id": "rash_spread",
+          "prompt": "Is the rash spreading quickly?",
+          "type": "yes_no"
+        },
+        {
+          "id": "rash_trigger",
+          "prompt": "Did it start soon after a new food, medication, or insect sting?",
+          "type": "yes_no"
+        },
+        {
+          "id": "rash_fever",
+          "prompt": "Any fever along with the rash?",
+          "type": "yes_no",
+          "if_yes_signal": "fever"
+        }
+      ]
+    },
+    {
+      "topic_id": "joint_pain",
+      "trigger_symptoms": [
+        "joint pain",
+        "joint swelling",
+        "joint stiffness"
+      ],
+      "priority_order": [
+        "joint_which",
+        "joint_injury",
+        "joint_fever",
+        "joint_duration"
+      ],
+      "questions": [
+        {
+          "id": "joint_which",
+          "prompt": "Which joint(s) are affected?",
+          "type": "choice",
+          "options": [
+            "One joint",
+            "Several joints",
+            "Most joints"
+          ]
+        },
+        {
+          "id": "joint_injury",
+          "prompt": "Was there a recent injury to the joint?",
+          "type": "yes_no"
+        },
+        {
+          "id": "joint_fever",
+          "prompt": "Any fever or redness/warmth over the joint?",
+          "type": "yes_no",
+          "if_yes_signal": "fever"
+        },
+        {
+          "id": "joint_duration",
+          "prompt": "How long has this been going on?",
+          "type": "choice",
+          "options": [
+            "Less than a week",
+            "1-6 weeks",
+            "More than 6 weeks"
+          ]
+        }
+      ]
+    }
+  ],
+  "generic_fallback_questions": [
+    {
+      "id": "fallback_associated",
+      "prompt": "Any other symptoms alongside this one that stand out to you?",
+      "type": "yes_no"
+    },
+    {
+      "id": "fallback_worsening",
+      "prompt": "Is it getting worse, staying the same, or improving?",
+      "type": "choice",
+      "options": [
+        "Getting worse",
+        "Staying the same",
+        "Improving"
+      ]
+    },
+    {
+      "id": "fallback_prior_episode",
+      "prompt": "Has this happened before?",
+      "type": "yes_no"
+    }
+  ]
+}
