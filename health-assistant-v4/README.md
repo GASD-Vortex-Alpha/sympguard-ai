@@ -25,7 +25,7 @@ health-assistant/
 │   ├── main.py                  # FastAPI app -- both pipelines (V3 legacy + V4 adaptive)
 │   ├── nlp_extraction.py        # Free text -> extracted symptom phrases (typo + negation aware)
 │   ├── symptom_analysis.py      # Extracted symptoms -> ranked condition matches
-│   ├── knowledge_base.json      # 29 curated conditions
+│   ├── knowledge_base.json      # 70 curated conditions (V3 had 29 -- see V4_CHANGELOG.md)
 │   ├── risk_assessment.py       # Matches + text -> low/moderate/urgent (now backed by safety/)
 │   ├── recommendation_engine.py # V3 legacy: risk level -> headline + first-aid text
 │   ├── safety_privacy.py        # Disclaimer, consent notice, log redaction
@@ -149,8 +149,9 @@ python3 tests/test_safety_engine.py
 network access, so `fastapi`/`pydantic`/`sqlalchemy`/`httpx` could not be
 installed there. Every test file that doesn't need them (safety engine,
 question engine, triage, first aid, emergency contacts, evidence, doctor
-summary, AI fallback, nlp negation, risk assessment — 61 tests total) **was
-actually run**, and real bugs were found and fixed as a result (see
+summary, AI fallback, nlp negation, risk assessment, knowledge-base
+expansion — 68 tests total) **was actually run**, and real bugs were found
+and fixed as a result (see
 `V4_CHANGELOG.md`). `tests/test_api.py`, the FastAPI `TestClient`-based
 integration suite, was written but could not be executed in that sandbox —
 please run it yourself after `pip install -r requirements.txt`.
@@ -159,8 +160,9 @@ please run it yourself after `pip install -r requirements.txt`.
 
 | Method | Endpoint | Auth | Description |
 |---|---|---|---|
-| POST | `/api/symptoms/start` | optional | Start a check: extracts symptoms, runs the initial safety pass, returns the first batch of adaptive questions (or `done: true` if already flagged) |
+| POST | `/api/symptoms/start` | optional | Start a check: extracts symptoms, runs the initial safety pass, pre-fills onset/severity if already stated, returns the first batch of adaptive questions (or `done: true` if already flagged) |
 | POST | `/api/symptoms/follow-up` | none | Submit answers, get the next batch of questions or `done: true` |
+| POST | `/api/symptoms/add-details` | none | Free-text: add a symptom the tap-only questions didn't cover; may surface new question topics |
 | POST | `/api/symptoms/analyze` | optional | Run the full pipeline and return the explainable result |
 | POST | `/api/doctor-summary` | none | Structured, copyable/printable summary for a clinician |
 | GET | `/api/first-aid` | none | List first-aid topics |
@@ -232,21 +234,43 @@ parameterized queries via SQLAlchemy). Before handling real patient data, add:
   regulations may apply depending on jurisdiction and use. This project does
   not implement that compliance out of the box.
 - **Session storage** — the adaptive-questions flow keeps session state
-  (extracted symptoms, question queue, answers) in an in-memory dict, capped
-  at 500 sessions, cleared on restart. This is a deliberate hackathon-scale
-  simplification (see `main.py`'s module docstring) — a real deployment
-  should use a proper session store with a TTL instead of process memory.
+  (extracted symptoms, answers so far) in the database (`SymptomCheckSession`
+  in `models.py`), which is what makes it work correctly on serverless
+  platforms like Vercel where an in-memory store would silently break across
+  requests. Rows aren't automatically expired yet — fine for a hackathon
+  demo, worth adding a cleanup job (delete sessions older than N hours)
+  before any real deployment.
 
 ## Deployment
 
 The `Dockerfile` in `backend/` builds a production-ready container. Typical
-path: push to a container registry, deploy on any container platform, point
-`DATABASE_URL` at a managed database, and serve `frontend/` from a static
-host. Before deploying the frontend, add a
+path: push to a container registry, deploy on any container platform (Render,
+Railway, Fly.io, etc.), point `DATABASE_URL` at a managed database, and serve
+`frontend/` from a static host. Before deploying the frontend, add a
 `<meta name="sympguard-api-base" content="https://your-api.example.com">` tag
 to each HTML file's `<head>` (see `frontend/js/config.js` — it reads this tag
 first, falls back to `localhost:8000` only when running on localhost, and
 never has a hardcoded production URL).
+
+**Vercel + Supabase (serverless):** works, but requires two specific things
+that a "normal" server deployment doesn't:
+- **Session storage must be database-backed, not in-memory** — already true
+  as of this version (`models.SymptomCheckSession`; see the changelog).
+  Deploying an earlier version with the in-memory `_SESSIONS` dict to
+  serverless would intermittently 404 on `/api/symptoms/follow-up`, since
+  consecutive requests can land on different, memory-isolated instances.
+- **Use Supabase's Transaction pooler connection string (port `6543`), not
+  the direct connection (port `5432`)** — direct connections exhaust the
+  free-tier connection limit almost immediately under serverless, since
+  each invocation can open its own connection. Get it from the project's
+  "Connect" button → Direct Connection string → Transaction mode. Also:
+  Supabase gives you `postgres://...`, but SQLAlchemy requires
+  `postgresql://...` — swap the scheme before using it as `DATABASE_URL`.
+
+Both frontend and backend deploy as separate Vercel projects from the same
+repo, each with **Root Directory** set to `backend` or `frontend`
+respectively — no `vercel.json` needed for the backend, Vercel auto-detects
+the FastAPI `app` object.
 
 ## Known Limitations
 

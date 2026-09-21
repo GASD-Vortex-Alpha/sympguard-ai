@@ -49,6 +49,36 @@ def test_reasoning_is_never_empty():
     assert result["reasoning"]
 
 
+def test_weak_trailing_match_does_not_hijack_the_narrative():
+    """Regression test for a real user-reported issue: whenever ANY
+    moderate-severity condition cleared MIN_CONFIDENCE_FOR_ESCALATION, it
+    permanently won the 'driving_match' / reasoning-text slot, even while
+    trailing far behind a much stronger, milder match -- because mild
+    severity can never itself trigger escalation (RISK_ORDER never
+    increases past 'low'). Concretely: someone describing clear cold
+    symptoms kept being told about 'Influenza' in the reasoning text
+    because Influenza barely cleared the floor, not because it was
+    actually a good explanation. Fixed via COMPETITIVE_MARGIN."""
+    text = "I have a runny nose, sneezing, and nasal congestion, feeling fine otherwise"
+    extracted = nlp.extract_symptoms(text)
+    matches = analyzer.analyze(extracted)
+    result = ra.assess_risk(matches, nlp.normalize(text))
+    assert result.get("driving_match_id") != "flu"
+
+
+def test_genuine_tie_still_escalates_conservatively():
+    """The fix must not swing too far the other way -- when two conditions
+    of different severity are genuinely, closely tied in confidence, the
+    higher-severity one should still legitimately drive escalation. Being
+    cautious in a real tie is correct; only a NON-competitive trailing
+    match should be excluded."""
+    text = "I have a runny nose and mild cough"
+    extracted = nlp.extract_symptoms(text)
+    matches = analyzer.analyze(extracted)
+    result = ra.assess_risk(matches, nlp.normalize(text))
+    assert result["risk_level"] == "moderate"
+
+
 if __name__ == "__main__":
     import traceback
     tests = [(name, fn) for name, fn in list(globals().items()) if name.startswith("test_") and callable(fn)]

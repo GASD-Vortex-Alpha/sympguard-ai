@@ -116,10 +116,20 @@ RED_FLAG_GROUPS = {
         "can't breathe", "cannot breathe", "difficulty breathing",
         "not breathing", "blue lips", "choking", "gasping for air",
         "stridor",
+        # Colloquial equivalents of "difficulty breathing" found missing
+        # during the end-to-end eval.
+        "trouble breathing", "trouble catching my breath",
+        "struggling to breathe", "hard time breathing",
     },
     "cardiac": {
         "chest pain", "crushing chest pain", "chest pressure",
         "chest tightness",
+        # "tight"/"tightness" are different literal words -- exact-word
+        # phrase matching means "chest tightness" never matches someone who
+        # says their chest "feels tight". Adding the adjective form directly
+        # rather than building a stemming/equivalence layer, consistent with
+        # how this file already lists both "facial drooping"/"face drooping".
+        "chest tight", "chest feels tight",
     },
     "neurological": {
         "facial drooping", "face drooping", "slurred speech",
@@ -137,6 +147,14 @@ RED_FLAG_GROUPS = {
     },
     "mental_health": {
         "suicidal", "suicide", "want to end my life", "self harm", "self-harm",
+        # Colloquial phrasings that mean the same thing but don't contain the
+        # literal words above -- found missing during the honest end-to-end
+        # eval (eval_pipeline.py): "thoughts of ending my life" was not being
+        # flagged at all because it shares no exact phrase with the list.
+        "thoughts of ending my life", "thoughts of suicide", "want to die",
+        "wanna die", "don't want to live", "no reason to live",
+        "kill myself", "ending it all", "better off dead",
+        "plan to kill myself", "have a plan to end my life",
     },
     "obstetric": {
         "heavy bleeding pregnant", "severe abdominal pain pregnant",
@@ -179,8 +197,10 @@ COMBINATION_RULES = [
         rule_id="cardiac_dyspnea",
         label="Possible cardiac emergency",
         any_of=[
-            {"chest pain", "chest pressure", "chest tightness"},
-            {"shortness of breath", "difficulty breathing", "cannot breathe", "can't breathe", "sweating"},
+            {"chest pain", "chest pressure", "chest tightness", "chest tight", "chest feels tight"},
+            {"shortness of breath", "difficulty breathing", "cannot breathe", "can't breathe",
+             "sweating", "trouble breathing", "trouble catching my breath",
+             "struggling to breathe", "hard time breathing"},
         ],
         rationale="Chest pain/pressure combined with breathing difficulty or sweating is a "
                    "classic heart-attack symptom pattern.",
@@ -221,13 +241,29 @@ COMBINATION_RULES = [
     CombinationRule(
         rule_id="high_fever_stiff_neck",
         label="Possible meningitis pattern",
+        # V4 fix (from honest eval): fever + stiff neck is ALREADY the
+        # classic meningitis warning-sign pair on its own -- requiring a
+        # third symptom (confusion/photophobia/rash) on top of that missed
+        # real cases where someone reports exactly those two things and
+        # nothing else. Confusion/photophobia/rash still matter clinically
+        # but shouldn't gate escalation when the core pair is present.
         any_of=[
             {"high fever", "fever"},
             {"stiff neck", "neck stiffness"},
-            {"confusion", "sensitivity to light", "rash"},
         ],
-        rationale="Fever with neck stiffness and either confusion, light sensitivity, or rash is "
-                   "a pattern associated with meningitis, which needs urgent evaluation.",
+        rationale="Fever combined with neck stiffness is the classic meningitis warning-sign "
+                   "pair and needs urgent evaluation on its own.",
+    ),
+    CombinationRule(
+        rule_id="syncope_altered_mental_status",
+        label="Possible serious cause of fainting",
+        any_of=[
+            {"fainted", "fainting", "passed out", "loss of consciousness"},
+            {"confusion", "confused", "disoriented", "couldn't remember"},
+        ],
+        rationale="Fainting combined with confusion or disorientation on waking can indicate a "
+                   "cardiac, neurological, or other serious cause rather than simple fainting, "
+                   "and needs urgent evaluation.",
     ),
 ]
 

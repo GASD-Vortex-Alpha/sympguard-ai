@@ -1,5 +1,71 @@
 # V4 Changelog
 
+## Post-delivery fixes and additions (from real deployment feedback)
+
+After the initial V4 delivery, testing against a live Vercel+Supabase
+deployment and real usage surfaced four more things worth documenting
+explicitly:
+
+1. **Session storage moved from an in-memory dict to the database**
+   (`models.SymptomCheckSession`). The original in-memory `_SESSIONS` dict
+   only works on a single long-running process -- it silently breaks on
+   serverless platforms (Vercel, etc.) where consecutive requests for the
+   same session can land on different, memory-isolated instances. Session
+   state (raw text, region, extracted symptoms, answers so far) now lives
+   in the same database as everything else. The question queue itself is
+   deliberately NOT stored -- it's a pure function of extracted_symptoms,
+   so it's recomputed on each request instead of risking two copies
+   drifting apart. `/api/doctor-summary` similarly recomputes the full
+   pipeline from stored inputs rather than caching a previous result,
+   since the pipeline is fully deterministic -- simpler than serializing
+   `ConditionMatch` objects into the database.
+2. **A real ranking-fairness bug in `risk_assessment.py`.** Reported
+   directly from live use: symptoms consistent with a common cold kept
+   being explained as "Influenza" in the reasoning text. Root cause: a
+   higher-severity match only needs to clear a low absolute confidence
+   floor to become the "driving match" narrated in the reasoning text --
+   and since a *mild*-severity match can never itself trigger escalation
+   (severity only escalates the risk level when it strictly *increases*,
+   and mild never increases past the "low" starting point), a
+   moderate-severity condition could dominate the narrative merely by
+   trailing not too far behind, even while a much stronger, milder match
+   sat at the top of "Possible Explanations." Fixed with a
+   `COMPETITIVE_MARGIN`: a higher-severity match now only drives escalation
+   if its confidence is genuinely close to the top match's, not just above
+   an absolute floor. A real tie still escalates (correctly cautious); a
+   weak trailing match no longer hijacks the explanation.
+3. **Onset/severity pre-detection** (`onset_detection.py`). If someone's
+   initial description already says "severe headache since this morning,"
+   the adaptive questions no longer re-ask "when did this start?" / "how
+   severe is it?" -- a small regex-based detector recognizes common timing
+   and severity phrasing (including numeric forms like "for 3 days," "5
+   days ago," "for about 10 days") and pre-fills those two questions so
+   `next_batch()` skips them automatically.
+4. **Free-text mid-flow additions** (`POST /api/symptoms/add-details`).
+   The adaptive questions are tap-only by design, but sometimes a symptom
+   just doesn't fit any of them -- so there's now a "something else going
+   on? type it here" option available throughout the follow-up flow.
+   Whatever's typed is: (a) run through the same symptom extraction as the
+   original description, potentially surfacing new question topics that
+   weren't relevant before, (b) appended to the stored raw text so it's
+   included in the final safety validation pass at analyze time, and (c)
+   checked immediately for its own red flags, short-circuiting straight to
+   results if what was just typed is itself an emergency signal (mirroring
+   `/api/symptoms/start`'s behavior). Building and testing this surfaced
+   another real gap: the rash/skin question topic's trigger list didn't
+   include "itching" even though it's a real, extractable knowledge-base
+   phrase -- fixed by broadening `question_bank.json`'s `rash_skin` topic
+   triggers.
+
+All four were caught and fixed the same way as everything else in this
+project: by actually running the code against realistic input, not just
+writing it. See `backend/tests/test_risk_assessment.py`,
+`backend/tests/test_onset_detection.py`, and
+`backend/tests/test_question_engine.py::test_add_details_can_surface_a_new_topic_not_in_the_original_text`
+for the regression tests. Full test count: 74 (up from 68), all passing at
+time of writing, same honesty caveat as before -- everything except
+`test_api.py` was actually executed in this sandbox.
+
 ## V3 features preserved
 - Full 5-stage pipeline logic: `nlp_extraction.py`, `symptom_analysis.py`,
   `risk_assessment.py`, `recommendation_engine.py` — all kept, all still used
@@ -43,9 +109,18 @@
   Q&A → results dashboard), first-aid library page, emergency help page,
   shared design system, all vanilla HTML/CSS/JS (no framework, no build step).
 
-## Two real bugs found and fixed during development
-Both were caught by actually running tests against the code, not just by
-inspection — worth calling out explicitly per the brief's "don't fake it"
+## Knowledge base expansion
+V3 shipped with 29 conditions. That's thin for a symptom checker, so V4 adds
+**41 more conditions (70 total)**, spread across more categories (plus two
+new ones: `ent_eye` and `dermatological`) — see `backend/knowledge_base.json`.
+Deliberately includes some conditions that are close differentials for
+existing emergency ones (e.g. Bell's Palsy vs. stroke — both share the
+"face drooping" symptom, and the system is designed to escalate to EMERGENCY
+for either, since only a clinician can reliably tell them apart).
+
+## Three real bugs found and fixed during development
+All three were caught by actually running tests against the code, not just
+by inspection — worth calling out explicitly per the brief's "don't fake it"
 instruction:
 
 1. **Negation was silently broken for contractions.** V3's `normalize()`
@@ -69,13 +144,31 @@ instruction:
    hardcoded wrong severity word. Fixed by having `risk_assessment.assess_risk()`
    return `driving_match_id` and having `triage.py` reason about that
    specific match instead of assuming it's always the top-confidence one.
+3. **Symptom extraction missed natural phrasing, including for a newly
+   added emergency condition.** `nlp_extraction.py` required a symptom
+   phrase to appear as a near-exact substring (or a same-length typo). Found
+   while testing the new Deep Vein Thrombosis entry: `"my leg is swollen red
+   and warm on one side with tenderness in my calf"` — a clear, plausible
+   DVT description — extracted **zero** symptoms, because the KB's phrases
+   ("leg swelling one side", "tenderness in calf") didn't appear as
+   contiguous substrings once the sentence was worded naturally. Fixed by
+   porting the same order-independent proximity matching already used in the
+   safety engine into `nlp_extraction.py`. That fix alone didn't catch a
+   second case found in the same session — `"my face is drooping"` still
+   extracted nothing relevant for Bell's Palsy/stroke, because the KB only
+   had `"facial drooping"` and the user said `"face"`, a different word
+   entirely, not a reordering or a typo. Fixed by adding `"face drooping"` as
+   an explicit synonym to both conditions (matching what the safety engine's
+   phrase list already had).
 
-See `backend/tests/test_nlp_negation.py` and
-`backend/tests/test_triage.py::test_reasoning_names_the_condition_that_actually_drove_the_risk_level`
-for the regression tests that would catch these again.
+See `backend/tests/test_nlp_negation.py`,
+`backend/tests/test_triage.py::test_reasoning_names_the_condition_that_actually_drove_the_risk_level`,
+and `backend/tests/test_kb_expansion.py` for the regression tests that would
+catch these again.
 
 ## Files changed
-- `backend/nlp_extraction.py` — negation/contraction fix (see above)
+- `backend/knowledge_base.json` — expanded from 29 to 70 conditions (see above)
+- `backend/nlp_extraction.py` — negation/contraction fix + proximity-matching fix (see above)
 - `backend/risk_assessment.py` — now backed by the shared safety engine;
   returns `driving_match_id`
 - `backend/main.py` — full rewrite, adds the V4 pipeline endpoints alongside

@@ -455,10 +455,14 @@
     {
       "topic_id": "rash_skin",
       "trigger_symptoms": [
-        "rash",
-        "hives",
         "swelling",
-        "itchy eyes"
+        "itchy skin",
+        "itching",
+        "red rash",
+        "rash",
+        "itchy eyes",
+        "hives",
+        "localized rash"
       ],
       "priority_order": [
         "rash_breathing",

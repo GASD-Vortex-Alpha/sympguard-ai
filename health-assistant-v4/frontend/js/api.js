@@ -37,6 +37,9 @@ const SympGuardAPI = (function () {
     followUp(sessionId, answers) {
       return request("/api/symptoms/follow-up", { method: "POST", body: JSON.stringify({ session_id: sessionId, answers: answers }) });
     },
+    addDetails(sessionId, text) {
+      return request("/api/symptoms/add-details", { method: "POST", body: JSON.stringify({ session_id: sessionId, text: text }) });
+    },
     analyze(sessionId) {
       return request("/api/symptoms/analyze", { method: "POST", body: JSON.stringify({ session_id: sessionId }) });
     },

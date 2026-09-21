@@ -26,13 +26,13 @@ stops working. V4 adds a second, richer pipeline alongside it:
     POST /api/doctor-summary
         -> doctor_summary.build_summary()         (template, not AI-generated)
 
-Session state (extracted symptoms, the question queue, answers so far) is
-kept in a small in-memory store -- see _SESSIONS below. This is a
-deliberate hackathon-appropriate simplification (brief section 20: don't
-overengineer): no session table, no Redis, just a capped dict. It resets on
-server restart; that's an accepted, documented limitation (see README), not
-an oversight -- see also safety_privacy.py's guidance on not storing more
-health data than necessary.
+Session state (extracted symptoms + answers so far) is stored in the same
+database as everything else (see models.SymptomCheckSession). This makes
+the app work correctly on serverless platforms (Vercel, etc.) where
+consecutive requests for the same session can land on different, isolated
+instances -- an in-memory dict would silently break there. See README
+"Deployment" for the Vercel + Supabase path, and docs/V3_AUDIT.md /
+V4_CHANGELOG.md for why this replaced V4's original in-memory approach.
 
 Run locally:
     pip install -r requirements.txt
@@ -45,9 +45,7 @@ Docs:
 import json
 import logging
 import os
-import uuid
-from collections import OrderedDict
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -63,13 +61,15 @@ import safety_privacy
 import triage
 import ai_provider
 import emergency_contacts_service
+import onset_detection
 from evidence import evidence_service
 from first_aid import first_aid_service
 from questions import question_engine
 from safety import red_flag_engine as safety_engine
 from symptom_analysis import analyzer
-from models import SymptomCheck, User, get_db, init_db
+from models import SymptomCheck, SymptomCheckSession, User, get_db, init_db
 from schemas import (
+    AddDetailsRequest,
     AnalyzeRequest,
     AnalyzeResponse,
     ConditionMatchOut,
@@ -310,26 +310,27 @@ def privacy_notice():
 
 # ---------------- V4: adaptive follow-up question pipeline ----------------
 
-# In-memory session store. Deliberately simple (brief section 20: don't
-# overengineer) -- see module docstring. Capped so a long-running demo
-# instance can't grow this unboundedly; oldest sessions are evicted first.
-_SESSIONS: "OrderedDict[str, dict]" = OrderedDict()
-_MAX_SESSIONS = 500
+# V4 originally kept this in an in-memory dict (fine for a single long-running
+# process, e.g. `uvicorn main:app` on a normal server or in Docker). That
+# breaks on serverless platforms (Vercel, etc.) where consecutive requests
+# for the same session_id can land on different, memory-isolated instances.
+# Session state now lives in the same database as everything else
+# (SymptomCheckSession, see models.py) so it works identically either way.
+#
+# Only raw_text / region / extracted_symptoms / answered are persisted. The
+# question queue is NOT stored -- question_engine.build_queue() is a pure
+# function of extracted_symptoms, so it's cheaper and safer to recompute it
+# on every request than to keep a second, potentially-stale copy of it in
+# the database.
 
-
-def _evict_old_sessions():
-    while len(_SESSIONS) > _MAX_SESSIONS:
-        _SESSIONS.popitem(last=False)
-
-
-def _get_session(session_id: str) -> dict:
-    session = _SESSIONS.get(session_id)
+def _get_session(session_id: str, db: Session) -> "SymptomCheckSession":
+    session = db.query(SymptomCheckSession).filter(SymptomCheckSession.id == session_id).first()
     if session is None:
         raise HTTPException(
             status_code=404,
-            detail="Session not found or expired. This can happen if the server restarted, or "
-                   "if the session is older than this demo's in-memory session limit -- start a "
-                   "new symptom check.",
+            detail="Session not found or expired. This can happen if the server restarted "
+                   "(non-persistent local storage) or the session_id is wrong -- start a new "
+                   "symptom check.",
         )
     return session
 
@@ -339,23 +340,27 @@ def _question_out(q: dict) -> QuestionOut:
 
 
 @app.post("/api/symptoms/start", response_model=StartCheckResponse)
-def start_symptom_check(payload: StartCheckRequest):
+def start_symptom_check(payload: StartCheckRequest, db: Session = Depends(get_db)):
     normalized = nlp_extraction.normalize(payload.text)
     extracted = nlp_extraction.extract_symptoms(payload.text)
     initial_safety = safety_engine.run_safety_check(normalized)
     queue = question_engine.build_queue(extracted)
 
-    session_id = str(uuid.uuid4())
-    _SESSIONS[session_id] = {
-        "raw_text": payload.text,
-        "region": payload.region,
-        "extracted_symptoms": extracted,
-        "queue": queue,
-        "answered": {},
-        "created_at": datetime.utcnow(),
-        "last_result": None,
-    }
-    _evict_old_sessions()
+    # If the person already said when it started / how severe it is in
+    # their initial description ("severe headache since this morning"),
+    # don't make them answer the same thing again as a separate question --
+    # pre-fill it and let next_batch() skip straight past it.
+    pre_answered = onset_detection.detect_intro_answers(payload.text)
+
+    session = SymptomCheckSession(
+        raw_text=payload.text,
+        region=payload.region,
+        extracted_symptoms=json.dumps(extracted),
+        answered=json.dumps(pre_answered),
+    )
+    db.add(session)
+    db.commit()
+    db.refresh(session)
 
     logger.info("symptom check started: %s", safety_privacy.redact_for_logging(payload.text))
 
@@ -365,16 +370,16 @@ def start_symptom_check(payload: StartCheckRequest):
         # /api/symptoms/analyze immediately (which re-confirms this via the
         # same, authoritative safety check as its final validation pass).
         return StartCheckResponse(
-            session_id=session_id,
+            session_id=session.id,
             extracted_symptoms=extracted,
             initial_safety_check=SafetyCheckOut(**initial_safety.to_dict()),
             questions=[],
             done=True,
         )
 
-    batch = question_engine.next_batch(queue, {})
+    batch = question_engine.next_batch(queue, pre_answered)
     return StartCheckResponse(
-        session_id=session_id,
+        session_id=session.id,
         extracted_symptoms=extracted,
         initial_safety_check=SafetyCheckOut(**initial_safety.to_dict()),
         questions=[_question_out(q) for q in batch["questions"]],
@@ -383,11 +388,66 @@ def start_symptom_check(payload: StartCheckRequest):
 
 
 @app.post("/api/symptoms/follow-up", response_model=FollowUpResponse)
-def follow_up(payload: FollowUpRequest):
-    session = _get_session(payload.session_id)
+def follow_up(payload: FollowUpRequest, db: Session = Depends(get_db)):
+    session = _get_session(payload.session_id, db)
+    extracted = json.loads(session.extracted_symptoms)
+    answered = json.loads(session.answered)
+
     for a in payload.answers:
-        session["answered"][a.question_id] = a.answer
-    batch = question_engine.next_batch(session["queue"], session["answered"])
+        answered[a.question_id] = a.answer
+    session.answered = json.dumps(answered)
+    db.add(session)
+    db.commit()
+
+    queue = question_engine.build_queue(extracted)
+    batch = question_engine.next_batch(queue, answered)
+    return FollowUpResponse(questions=[_question_out(q) for q in batch["questions"]], done=batch["done"])
+
+
+@app.post("/api/symptoms/add-details", response_model=FollowUpResponse)
+def add_details(payload: AddDetailsRequest, db: Session = Depends(get_db)):
+    """
+    Lets the person type something in their own words mid-flow instead of
+    being limited to the tap-only yes/no and multiple-choice questions --
+    e.g. "I also just noticed a rash on my arms" adds "rash" to what's being
+    considered even though no question asked about it directly.
+
+    Whatever they type is folded into the same places typed-once free text
+    would be:
+      - nlp_extraction pulls out any new symptom phrases, which can surface
+        NEW follow-up question topics next_batch() hadn't offered before
+        (build_queue() is a pure function of extracted_symptoms, so
+        rebuilding it here picks these up automatically)
+      - the raw text is appended to the session's raw_text, so it's part of
+        what /api/symptoms/analyze's final safety validation pass sees --
+        typing "actually I can't breathe now" mid-flow must be caught just
+        as reliably as if it had been in the original description
+      - an immediate safety check on just the new text mirrors /start's
+        early-exit behavior: if what they just typed is itself a clear red
+        flag, stop asking routine questions right away
+    """
+    session = _get_session(payload.session_id, db)
+    extracted = json.loads(session.extracted_symptoms)
+    answered = json.loads(session.answered)
+
+    new_text_normalized = nlp_extraction.normalize(payload.text)
+    immediate_safety = safety_engine.run_safety_check(new_text_normalized)
+
+    new_symptoms = nlp_extraction.extract_symptoms(payload.text)
+    merged_symptoms = extracted + [s for s in new_symptoms if s not in extracted]
+
+    session.raw_text = f"{session.raw_text} {payload.text}"
+    session.extracted_symptoms = json.dumps(merged_symptoms)
+    db.add(session)
+    db.commit()
+
+    logger.info("symptom check details added: %s", safety_privacy.redact_for_logging(payload.text))
+
+    if immediate_safety.is_emergency:
+        return FollowUpResponse(questions=[], done=True)
+
+    queue = question_engine.build_queue(merged_symptoms)
+    batch = question_engine.next_batch(queue, answered)
     return FollowUpResponse(questions=[_question_out(q) for q in batch["questions"]], done=batch["done"])
 
 
@@ -445,37 +505,46 @@ _UNCERTAINTY_NOTE = (
 )
 
 
+def _run_full_pipeline(raw_text: str, extracted: list, answered: dict):
+    """
+    Shared by /api/symptoms/analyze and /api/doctor-summary. Fully
+    deterministic given the same inputs (no randomness, no external state),
+    so recomputing it for the doctor summary instead of caching the
+    analyze() result is provably equivalent -- and it means nothing needs
+    to persist ConditionMatch objects (which aren't JSON-serializable as-is)
+    in the database. Trades a few milliseconds of recomputation for a much
+    simpler, more portable session store.
+    """
+    queue = question_engine.build_queue(extracted)
+    normalized_original = nlp_extraction.normalize(raw_text)
+    signals = question_engine.extract_signals(queue, answered)
+    combined_text = " ".join([normalized_original] + signals)
+
+    matches = analyzer.analyze(extracted)
+    risk = risk_assessment.assess_risk(matches, combined_text)
+    final_safety = safety_engine.run_safety_check(combined_text)  # <-- final validation, always wins
+    result = triage.classify(
+        risk["risk_level"], risk["red_flags"], matches,
+        safety_is_emergency=final_safety.is_emergency,
+        driving_match_id=risk.get("driving_match_id"),
+    )
+    answers_summary = question_engine.answers_summary(queue, answered)
+    return matches, risk, final_safety, result, answers_summary
+
+
 @app.post("/api/symptoms/analyze", response_model=AnalyzeResponse)
 def analyze_symptoms(
     payload: AnalyzeRequest,
     db: Session = Depends(get_db),
     current_user: User = Depends(auth.get_current_user),
 ):
-    session = _get_session(payload.session_id)
-    raw_text = session["raw_text"]
-    extracted = session["extracted_symptoms"]
-    queue = session["queue"]
-    answered = session["answered"]
+    session = _get_session(payload.session_id, db)
+    raw_text = session.raw_text
+    extracted = json.loads(session.extracted_symptoms)
+    answered = json.loads(session.answered)
 
-    normalized_original = nlp_extraction.normalize(raw_text)
-    signals = question_engine.extract_signals(queue, answered)
-    # Final validation text = original description + every red-flag signal
-    # implied by the follow-up answers (e.g. "worst headache of my life" if
-    # they answered Yes to that question). This is what makes an answer
-    # given DURING follow-up questions just as safety-relevant as something
-    # said in the original free text.
-    combined_text = " ".join([normalized_original] + signals)
+    matches, risk, final_safety, result, answers_summary = _run_full_pipeline(raw_text, extracted, answered)
 
-    matches = analyzer.analyze(extracted)
-    risk = risk_assessment.assess_risk(matches, combined_text)
-    final_safety = safety_engine.run_safety_check(combined_text)  # <-- pass 2 / final validation
-    result = triage.classify(
-        risk["risk_level"], risk["red_flags"], matches,
-        safety_is_emergency=final_safety.is_emergency,
-        driving_match_id=risk.get("driving_match_id"),
-    )
-
-    answers_summary = question_engine.answers_summary(queue, answered)
     evidence = evidence_service.get_evidence(matches)
     explanation = ai_provider.get_explanation(extracted, answers_summary, matches, risk["red_flags"], result.label)
 
@@ -488,7 +557,7 @@ def analyze_symptoms(
     emergency_contacts = None
     if final_safety.is_emergency:
         categories = safety_engine.matched_categories(final_safety)
-        contacts = emergency_contacts_service.get_contacts(session.get("region"))
+        contacts = emergency_contacts_service.get_contacts(session.region)
         emergency_contacts = EmergencyContactsOut(
             region_code=contacts["region_code"],
             label=contacts["label"],
@@ -514,16 +583,6 @@ def analyze_symptoms(
     db.commit()
     db.refresh(record)
 
-    # Cache for /api/doctor-summary so it doesn't need to recompute (and so
-    # the summary always matches exactly what the results screen showed).
-    session["last_result"] = {
-        "matches": matches,
-        "red_flags": risk["red_flags"],
-        "triage_category": result.category,
-        "triage_label": result.label,
-        "answers_summary": answers_summary,
-    }
-
     return AnalyzeResponse(
         session_id=payload.session_id,
         is_emergency=final_safety.is_emergency,
@@ -547,22 +606,22 @@ def analyze_symptoms(
 
 
 @app.post("/api/doctor-summary", response_model=DoctorSummaryResponse)
-def create_doctor_summary(payload: DoctorSummaryRequest):
-    session = _get_session(payload.session_id)
-    last = session.get("last_result")
-    if not last:
-        raise HTTPException(
-            status_code=400,
-            detail="No analysis found for this session yet -- call /api/symptoms/analyze first.",
-        )
+def create_doctor_summary(payload: DoctorSummaryRequest, db: Session = Depends(get_db)):
+    session = _get_session(payload.session_id, db)
+    raw_text = session.raw_text
+    extracted = json.loads(session.extracted_symptoms)
+    answered = json.loads(session.answered)
+
+    matches, risk, final_safety, result, answers_summary = _run_full_pipeline(raw_text, extracted, answered)
+
     summary = doctor_summary.build_summary(
-        raw_text=session["raw_text"],
-        extracted_symptoms=session["extracted_symptoms"],
-        answers=last["answers_summary"],
-        matches=last["matches"],
-        red_flags=last["red_flags"],
-        triage_category=last["triage_category"],
-        triage_label=last["triage_label"],
+        raw_text=raw_text,
+        extracted_symptoms=extracted,
+        answers=answers_summary,
+        matches=matches,
+        red_flags=risk["red_flags"],
+        triage_category=result.category,
+        triage_label=result.label,
     )
     return DoctorSummaryResponse(**summary)
 

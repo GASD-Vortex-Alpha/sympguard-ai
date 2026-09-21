@@ -9,7 +9,9 @@
       "severity": "mild | moderate | emergency",
       "first_aid": "immediate lay-person steps for moderate/emergency entries; null where not applicable (e.g. mild, chronic-only conditions)",
       "related_conditions": "ids of conditions with overlapping symptoms, for differential-diagnosis cross-referencing"
-    }
+    },
+    "condition_count": 70,
+    "v4_expansion_note": "V4 added 41 conditions to V3's original 29 (see docs/V3_AUDIT.md and V4_CHANGELOG.md), covering more common presentations across ENT/eye, additional gastrointestinal, cardiovascular, endocrine, dermatological, and musculoskeletal categories, plus a new 'ent_eye' and 'dermatological' category. Same disclosure applies as the original 29: this is a curated educational scaffold, not independently verified per-entry against a clinical source."
   },
   "conditions": [
     {
@@ -17,319 +19,601 @@
       "name": "Common Cold",
       "icd10": "J00",
       "category": "infectious",
-      "symptoms": ["runny nose", "sneezing", "sore throat", "cough", "congestion", "mild fever", "fatigue", "headache"],
+      "symptoms": [
+        "runny nose",
+        "sneezing",
+        "sore throat",
+        "cough",
+        "congestion",
+        "mild fever",
+        "fatigue",
+        "headache"
+      ],
       "severity": "mild",
       "description": "A viral infection of the upper respiratory tract, usually resolving within 7-10 days.",
       "advice": "Rest, stay hydrated, and use over-the-counter remedies for symptom relief. See a doctor if symptoms persist beyond 10 days or worsen.",
       "first_aid": null,
-      "related_conditions": ["flu", "allergic_rhinitis", "covid19"]
+      "related_conditions": [
+        "flu",
+        "allergic_rhinitis",
+        "covid19"
+      ]
     },
     {
       "id": "flu",
       "name": "Influenza (Flu)",
       "icd10": "J11",
       "category": "infectious",
-      "symptoms": ["fever", "chills", "muscle aches", "fatigue", "headache", "cough", "sore throat", "runny nose"],
+      "symptoms": [
+        "fever",
+        "chills",
+        "muscle aches",
+        "fatigue",
+        "headache",
+        "cough",
+        "sore throat",
+        "runny nose"
+      ],
       "severity": "moderate",
       "description": "A contagious viral respiratory illness that can range from mild to severe.",
       "advice": "Rest and fluids are key. Antiviral medications may help if started early. Seek care if breathing difficulty, chest pain, or persistent high fever occurs.",
       "first_aid": "Rest and stay hydrated. Use a fever reducer per the label if needed. Seek urgent care if breathing becomes difficult, chest pain develops, or fever is very high and doesn't respond to medication.",
-      "related_conditions": ["common_cold", "covid19", "pneumonia"]
+      "related_conditions": [
+        "common_cold",
+        "covid19",
+        "pneumonia"
+      ]
     },
     {
       "id": "migraine",
       "name": "Migraine",
       "icd10": "G43",
       "category": "neurological",
-      "symptoms": ["severe headache", "nausea", "sensitivity to light", "sensitivity to sound", "vomiting", "visual disturbances", "throbbing pain"],
+      "symptoms": [
+        "severe headache",
+        "nausea",
+        "sensitivity to light",
+        "sensitivity to sound",
+        "vomiting",
+        "visual disturbances",
+        "throbbing pain"
+      ],
       "severity": "moderate",
       "description": "A neurological condition causing intense, debilitating headaches often with other symptoms.",
       "advice": "Rest in a dark, quiet room. Consider known triggers. If migraines are frequent or severe, consult a neurologist.",
       "first_aid": "Move to a dark, quiet room and rest. Apply a cool compress to the forehead or neck. Seek urgent care if this is the 'worst headache of your life,' comes on suddenly, or is accompanied by confusion, weakness, or fever -- those can signal something more serious than a migraine.",
-      "related_conditions": ["tension_headache", "stroke"]
+      "related_conditions": [
+        "tension_headache",
+        "stroke"
+      ]
     },
     {
       "id": "gastroenteritis",
       "name": "Gastroenteritis (Stomach Flu)",
       "icd10": "A09",
       "category": "infectious",
-      "symptoms": ["nausea", "vomiting", "diarrhea", "abdominal pain", "cramping", "mild fever", "fatigue"],
+      "symptoms": [
+        "nausea",
+        "vomiting",
+        "diarrhea",
+        "abdominal pain",
+        "cramping",
+        "mild fever",
+        "fatigue"
+      ],
       "severity": "mild",
       "description": "Inflammation of the stomach and intestines, usually caused by a virus or bacteria.",
       "advice": "Stay hydrated with fluids and electrolytes. Seek medical attention if unable to keep fluids down, or if symptoms persist beyond a few days.",
       "first_aid": "Sip clear fluids or an oral rehydration solution frequently, in small amounts. Avoid solid food until vomiting settles. Seek care if there are signs of dehydration (very dark urine, dizziness, no urination for 8+ hours) or if vomiting/diarrhea contains blood.",
-      "related_conditions": ["appendicitis", "peptic_ulcer_disease"]
+      "related_conditions": [
+        "appendicitis",
+        "peptic_ulcer_disease"
+      ]
     },
     {
       "id": "allergic_rhinitis",
       "name": "Allergic Rhinitis (Allergies)",
       "icd10": "J30",
       "category": "respiratory",
-      "symptoms": ["sneezing", "runny nose", "itchy eyes", "watery eyes", "congestion", "itchy throat"],
+      "symptoms": [
+        "sneezing",
+        "runny nose",
+        "itchy eyes",
+        "watery eyes",
+        "congestion",
+        "itchy throat"
+      ],
       "severity": "mild",
       "description": "An allergic response to airborne substances like pollen, dust, or pet dander.",
       "advice": "Antihistamines and avoiding known allergens can help. Consult a doctor if symptoms are persistent or severe.",
       "first_aid": null,
-      "related_conditions": ["common_cold", "asthma"]
+      "related_conditions": [
+        "common_cold",
+        "asthma"
+      ]
     },
     {
       "id": "covid19",
       "name": "COVID-19",
       "icd10": "U07.1",
       "category": "infectious",
-      "symptoms": ["fever", "cough", "shortness of breath", "loss of taste", "loss of smell", "fatigue", "muscle aches", "sore throat", "headache"],
+      "symptoms": [
+        "fever",
+        "cough",
+        "shortness of breath",
+        "loss of taste",
+        "loss of smell",
+        "fatigue",
+        "muscle aches",
+        "sore throat",
+        "headache"
+      ],
       "severity": "moderate",
       "description": "A respiratory illness caused by the SARS-CoV-2 virus, with variable severity.",
       "advice": "Test if possible, isolate, and monitor symptoms. Seek immediate care for difficulty breathing, persistent chest pain, or confusion.",
       "first_aid": "Isolate from others, rest, and stay hydrated. Monitor breathing and oxygen levels if a pulse oximeter is available. Seek emergency care immediately for trouble breathing, persistent chest pain or pressure, confusion, or bluish lips/face.",
-      "related_conditions": ["flu", "pneumonia"]
+      "related_conditions": [
+        "flu",
+        "pneumonia"
+      ]
     },
     {
       "id": "urinary_tract_infection",
       "name": "Urinary Tract Infection (UTI)",
       "icd10": "N39.0",
       "category": "urological",
-      "symptoms": ["burning urination", "frequent urination", "urgency", "pelvic pain", "cloudy urine", "lower abdominal pain"],
+      "symptoms": [
+        "burning urination",
+        "frequent urination",
+        "urgency",
+        "pelvic pain",
+        "cloudy urine",
+        "lower abdominal pain"
+      ],
       "severity": "moderate",
       "description": "A bacterial infection affecting any part of the urinary system.",
       "advice": "See a doctor for antibiotic treatment. Untreated UTIs can spread to the kidneys.",
       "first_aid": "Drink extra water to help flush the urinary tract. See a doctor for antibiotics -- this doesn't resolve on its own. Seek urgent care if fever, chills, or back/flank pain develop, which can indicate a kidney infection.",
-      "related_conditions": ["kidney_stones"]
+      "related_conditions": [
+        "kidney_stones"
+      ]
     },
     {
       "id": "anxiety",
       "name": "Anxiety",
       "icd10": "F41.9",
       "category": "mental_health",
-      "symptoms": ["rapid heartbeat", "sweating", "trembling", "shortness of breath", "restlessness", "difficulty concentrating", "fatigue", "muscle tension"],
+      "symptoms": [
+        "rapid heartbeat",
+        "sweating",
+        "trembling",
+        "shortness of breath",
+        "restlessness",
+        "difficulty concentrating",
+        "fatigue",
+        "muscle tension"
+      ],
       "severity": "mild",
       "description": "A mental health condition characterized by excessive worry and physical tension.",
       "advice": "Relaxation techniques, exercise, and talking to a mental health professional can help. Seek urgent care if experiencing a panic attack with chest pain.",
       "first_aid": "Encourage slow, deep breathing (in for 4 counts, hold for 4, out for 6). Move to a calm, quiet space. Seek urgent evaluation if chest pain, fainting, or a racing heart doesn't settle, since these can also indicate a cardiac issue and shouldn't be assumed to be anxiety without a check.",
-      "related_conditions": ["depression", "myocardial_infarction"]
+      "related_conditions": [
+        "depression",
+        "myocardial_infarction"
+      ]
     },
     {
       "id": "depression",
       "name": "Depression (Major Depressive Disorder)",
       "icd10": "F32",
       "category": "mental_health",
-      "symptoms": ["persistent sadness", "loss of interest", "fatigue", "sleep disturbance", "appetite changes", "difficulty concentrating", "feelings of worthlessness"],
+      "symptoms": [
+        "persistent sadness",
+        "loss of interest",
+        "fatigue",
+        "sleep disturbance",
+        "appetite changes",
+        "difficulty concentrating",
+        "feelings of worthlessness"
+      ],
       "severity": "moderate",
       "description": "A mood disorder causing persistent feelings of sadness and loss of interest, affecting daily functioning.",
       "advice": "Talking to a mental health professional is the recommended first step -- depression is treatable. Maintaining routine, sleep, and social connection can help alongside professional care.",
       "first_aid": "Encourage the person to talk to a doctor or mental health professional; offer to help them find one or go with them. If they express thoughts of self-harm or suicide, don't leave them alone -- help them contact a crisis line or emergency services immediately.",
-      "related_conditions": ["anxiety"]
+      "related_conditions": [
+        "anxiety"
+      ]
     },
     {
       "id": "myocardial_infarction",
       "name": "Possible Heart Attack",
       "icd10": "I21",
       "category": "cardiovascular",
-      "symptoms": ["chest pain", "chest pressure", "pain radiating to arm", "shortness of breath", "cold sweat", "nausea", "lightheadedness", "jaw pain"],
+      "symptoms": [
+        "chest pain",
+        "chest pressure",
+        "pain radiating to arm",
+        "shortness of breath",
+        "cold sweat",
+        "nausea",
+        "lightheadedness",
+        "jaw pain"
+      ],
       "severity": "emergency",
       "description": "A medical emergency where blood flow to the heart is blocked.",
       "advice": "CALL EMERGENCY SERVICES IMMEDIATELY. Do not drive yourself. This is a life-threatening emergency.",
       "first_aid": "Call emergency services immediately. Have the person sit or lie down in a comfortable position and loosen tight clothing. If they are not allergic and it isn't otherwise contraindicated, chewing an aspirin can help -- but don't delay calling for help to look for one. Be prepared to start CPR if they become unresponsive and stop breathing normally.",
-      "related_conditions": ["anxiety", "stroke"]
+      "related_conditions": [
+        "anxiety",
+        "stroke"
+      ]
     },
     {
       "id": "stroke",
       "name": "Possible Stroke",
       "icd10": "I63",
       "category": "neurological",
-      "symptoms": ["facial drooping", "arm weakness", "slurred speech", "sudden confusion", "sudden numbness", "severe headache", "vision loss", "loss of balance"],
+      "symptoms": [
+        "facial drooping",
+        "face drooping",
+        "arm weakness",
+        "slurred speech",
+        "sudden confusion",
+        "sudden numbness",
+        "severe headache",
+        "vision loss",
+        "loss of balance"
+      ],
       "severity": "emergency",
       "description": "A medical emergency caused by interrupted blood supply to the brain.",
       "advice": "CALL EMERGENCY SERVICES IMMEDIATELY. Note the time symptoms started. This is a life-threatening emergency.",
       "first_aid": "Use the FAST check -- Face drooping, Arm weakness, Speech difficulty, Time to call emergency services. Note exactly when symptoms started (critical for treatment decisions). Do not give food, drink, or medication. If unconscious but breathing, place in the recovery position on their side.",
-      "related_conditions": ["migraine", "myocardial_infarction"]
+      "related_conditions": [
+        "migraine",
+        "myocardial_infarction"
+      ]
     },
     {
       "id": "appendicitis",
       "name": "Possible Appendicitis",
       "icd10": "K35",
       "category": "gastrointestinal",
-      "symptoms": ["abdominal pain", "pain near navel", "pain lower right abdomen", "nausea", "vomiting", "fever", "loss of appetite"],
+      "symptoms": [
+        "abdominal pain",
+        "pain near navel",
+        "pain lower right abdomen",
+        "nausea",
+        "vomiting",
+        "fever",
+        "loss of appetite"
+      ],
       "severity": "emergency",
       "description": "Inflammation of the appendix that can rupture if untreated.",
       "advice": "Seek emergency care immediately. Do not eat or drink. This requires urgent medical evaluation.",
       "first_aid": "Seek emergency care immediately. Do not eat, drink, or take pain medication/laxatives, as these can complicate diagnosis or a possible rupture. Do not apply heat to the abdomen.",
-      "related_conditions": ["gastroenteritis", "peptic_ulcer_disease", "kidney_stones"]
+      "related_conditions": [
+        "gastroenteritis",
+        "peptic_ulcer_disease",
+        "kidney_stones"
+      ]
     },
     {
       "id": "tension_headache",
       "name": "Tension Headache",
       "icd10": "G44.2",
       "category": "neurological",
-      "symptoms": ["dull headache", "pressure around head", "tightness in scalp", "neck pain", "mild sensitivity to light"],
+      "symptoms": [
+        "dull headache",
+        "pressure around head",
+        "tightness in scalp",
+        "neck pain",
+        "mild sensitivity to light"
+      ],
       "severity": "mild",
       "description": "The most common type of headache, often linked to stress or muscle tension.",
       "advice": "Rest, hydration, and over-the-counter pain relief usually help. See a doctor if headaches become frequent or severe.",
       "first_aid": null,
-      "related_conditions": ["migraine"]
+      "related_conditions": [
+        "migraine"
+      ]
     },
     {
       "id": "asthma",
       "name": "Asthma",
       "icd10": "J45",
       "category": "respiratory",
-      "symptoms": ["wheezing", "shortness of breath", "chest tightness", "cough", "difficulty breathing"],
+      "symptoms": [
+        "wheezing",
+        "shortness of breath",
+        "chest tightness",
+        "cough",
+        "difficulty breathing"
+      ],
       "severity": "moderate",
       "description": "A chronic condition causing inflammation and narrowing of the airways.",
       "advice": "Use a prescribed inhaler as directed. See a doctor to establish a long-term management plan if newly diagnosed.",
       "first_aid": "Help the person sit upright and stay calm. Use their prescribed rescue inhaler (usually 2 puffs, repeated as directed). Call emergency services if there's no improvement after using the inhaler, lips or fingertips turn blue, or they can't speak in full sentences.",
-      "related_conditions": ["allergic_rhinitis", "pneumonia", "covid19"]
+      "related_conditions": [
+        "allergic_rhinitis",
+        "pneumonia",
+        "covid19"
+      ]
     },
     {
       "id": "pneumonia",
       "name": "Pneumonia",
       "icd10": "J18",
       "category": "respiratory",
-      "symptoms": ["cough", "fever", "chills", "shortness of breath", "chest pain", "fatigue", "confusion"],
+      "symptoms": [
+        "cough",
+        "fever",
+        "chills",
+        "shortness of breath",
+        "chest pain",
+        "fatigue",
+        "confusion"
+      ],
       "severity": "moderate",
       "description": "An infection that inflames the air sacs in one or both lungs, which may fill with fluid.",
       "advice": "See a doctor promptly for evaluation, which may include antibiotics if bacterial. Rest and stay hydrated.",
       "first_aid": "Seek medical evaluation promptly, especially in young children, older adults, or anyone with a weakened immune system. Seek emergency care immediately for severe difficulty breathing, bluish lips, confusion, or chest pain that worsens with breathing.",
-      "related_conditions": ["flu", "covid19", "asthma"]
+      "related_conditions": [
+        "flu",
+        "covid19",
+        "asthma"
+      ]
     },
     {
       "id": "gerd",
       "name": "Gastroesophageal Reflux Disease (GERD)",
       "icd10": "K21",
       "category": "gastrointestinal",
-      "symptoms": ["heartburn", "regurgitation", "chest discomfort", "difficulty swallowing", "chronic cough", "sore throat"],
+      "symptoms": [
+        "heartburn",
+        "regurgitation",
+        "chest discomfort",
+        "difficulty swallowing",
+        "chronic cough",
+        "sore throat"
+      ],
       "severity": "mild",
       "description": "A chronic condition where stomach acid frequently flows back into the esophagus.",
       "advice": "Avoid trigger foods, eat smaller meals, and avoid lying down right after eating. See a doctor if symptoms are frequent or severe.",
       "first_aid": "If chest discomfort could be cardiac rather than digestive (especially with sweating, shortness of breath, or pain radiating to the arm/jaw), treat it as a possible heart attack and call emergency services -- don't assume it's reflux.",
-      "related_conditions": ["peptic_ulcer_disease", "myocardial_infarction"]
+      "related_conditions": [
+        "peptic_ulcer_disease",
+        "myocardial_infarction"
+      ]
     },
     {
       "id": "peptic_ulcer_disease",
       "name": "Peptic Ulcer Disease",
       "icd10": "K27",
       "category": "gastrointestinal",
-      "symptoms": ["burning abdominal pain", "bloating", "nausea", "loss of appetite", "dark stools", "vomiting blood"],
+      "symptoms": [
+        "burning abdominal pain",
+        "bloating",
+        "nausea",
+        "loss of appetite",
+        "dark stools",
+        "vomiting blood"
+      ],
       "severity": "moderate",
       "description": "Open sores that develop on the inner lining of the stomach or upper small intestine.",
       "advice": "See a doctor for evaluation and treatment, which may include acid-reducing medication and testing for H. pylori infection.",
       "first_aid": "Seek emergency care immediately if vomiting blood, passing black/tarry stools, or experiencing sudden severe abdominal pain -- these can indicate a bleeding or perforated ulcer.",
-      "related_conditions": ["gerd", "gastroenteritis", "appendicitis"]
+      "related_conditions": [
+        "gerd",
+        "gastroenteritis",
+        "appendicitis"
+      ]
     },
     {
       "id": "kidney_stones",
       "name": "Kidney Stones (Nephrolithiasis)",
       "icd10": "N20",
       "category": "urological",
-      "symptoms": ["severe flank pain", "pain radiating to groin", "blood in urine", "nausea", "vomiting", "frequent urination", "painful urination"],
+      "symptoms": [
+        "severe flank pain",
+        "pain radiating to groin",
+        "blood in urine",
+        "nausea",
+        "vomiting",
+        "frequent urination",
+        "painful urination"
+      ],
       "severity": "moderate",
       "description": "Hard deposits of minerals and salts that form inside the kidneys.",
       "advice": "See a doctor for evaluation and pain management. Most small stones pass on their own with increased fluid intake.",
       "first_aid": "Stay hydrated and use over-the-counter pain relief as directed. Seek emergency care for fever with flank pain (possible infection), inability to urinate, or pain too severe to manage.",
-      "related_conditions": ["urinary_tract_infection", "appendicitis"]
+      "related_conditions": [
+        "urinary_tract_infection",
+        "appendicitis"
+      ]
     },
     {
       "id": "rheumatoid_arthritis",
       "name": "Rheumatoid Arthritis",
       "icd10": "M06",
       "category": "autoimmune",
-      "symptoms": ["joint pain", "joint swelling", "joint stiffness", "fatigue", "low-grade fever", "symmetrical joint involvement"],
+      "symptoms": [
+        "joint pain",
+        "joint swelling",
+        "joint stiffness",
+        "fatigue",
+        "low-grade fever",
+        "symmetrical joint involvement"
+      ],
       "severity": "moderate",
       "description": "A chronic autoimmune disorder causing inflammation of the joints.",
       "advice": "See a rheumatologist for diagnosis and disease-modifying treatment -- early treatment helps prevent joint damage.",
       "first_aid": null,
-      "related_conditions": ["osteoarthritis"]
+      "related_conditions": [
+        "osteoarthritis"
+      ]
     },
     {
       "id": "osteoarthritis",
       "name": "Osteoarthritis",
       "icd10": "M19",
       "category": "musculoskeletal",
-      "symptoms": ["joint pain", "joint stiffness", "reduced range of motion", "joint swelling", "grinding sensation in joint"],
+      "symptoms": [
+        "joint pain",
+        "joint stiffness",
+        "reduced range of motion",
+        "joint swelling",
+        "grinding sensation in joint"
+      ],
       "severity": "mild",
       "description": "A degenerative joint condition caused by the breakdown of cartilage, common with age or joint overuse.",
       "advice": "Low-impact exercise, weight management, and physical therapy can help. See a doctor if pain limits daily activities or doesn't respond to basic care.",
       "first_aid": null,
-      "related_conditions": ["rheumatoid_arthritis"]
+      "related_conditions": [
+        "rheumatoid_arthritis"
+      ]
     },
     {
       "id": "type2_diabetes",
       "name": "Type 2 Diabetes",
       "icd10": "E11",
       "category": "endocrine",
-      "symptoms": ["increased thirst", "frequent urination", "fatigue", "blurred vision", "slow-healing sores", "unexplained weight loss"],
+      "symptoms": [
+        "increased thirst",
+        "frequent urination",
+        "fatigue",
+        "blurred vision",
+        "slow-healing sores",
+        "unexplained weight loss"
+      ],
       "severity": "moderate",
       "description": "A chronic condition affecting how the body processes blood sugar (glucose).",
       "advice": "See a doctor for blood sugar testing and a management plan involving diet, exercise, and possibly medication.",
       "first_aid": "For a known diabetic showing confusion, shakiness, sweating, or fainting (possible low blood sugar), give fast-acting sugar (juice, glucose tablets) if they're conscious and able to swallow. Call emergency services if they lose consciousness or don't improve within 15 minutes.",
-      "related_conditions": ["hypothyroidism"]
+      "related_conditions": [
+        "hypothyroidism"
+      ]
     },
     {
       "id": "hypothyroidism",
       "name": "Hypothyroidism",
       "icd10": "E03",
       "category": "endocrine",
-      "symptoms": ["fatigue", "weight gain", "cold intolerance", "dry skin", "hair loss", "depression", "constipation"],
+      "symptoms": [
+        "fatigue",
+        "weight gain",
+        "cold intolerance",
+        "dry skin",
+        "hair loss",
+        "depression",
+        "constipation"
+      ],
       "severity": "mild",
       "description": "A condition in which the thyroid gland doesn't produce enough thyroid hormone.",
       "advice": "See a doctor for blood testing. This is typically well-managed with daily thyroid hormone replacement medication.",
       "first_aid": null,
-      "related_conditions": ["type2_diabetes", "depression"]
+      "related_conditions": [
+        "type2_diabetes",
+        "depression"
+      ]
     },
     {
       "id": "epilepsy",
       "name": "Epilepsy / Seizure Disorder",
       "icd10": "G40",
       "category": "neurological",
-      "symptoms": ["convulsions", "loss of consciousness", "staring spells", "temporary confusion", "muscle stiffness", "uncontrolled jerking movements"],
+      "symptoms": [
+        "convulsions",
+        "loss of consciousness",
+        "staring spells",
+        "temporary confusion",
+        "muscle stiffness",
+        "uncontrolled jerking movements"
+      ],
       "severity": "moderate",
       "description": "A neurological disorder marked by recurrent, unprovoked seizures.",
       "advice": "See a neurologist for diagnosis and treatment, typically involving anti-seizure medication.",
       "first_aid": "Ease the person to the floor and clear the area of hazards. Place something soft under their head and turn them onto their side. Time the seizure. Do NOT restrain them or put anything in their mouth. Call emergency services if the seizure lasts more than 5 minutes, a second seizure follows immediately, they don't regain consciousness, or it's a first-time seizure.",
-      "related_conditions": ["stroke"]
+      "related_conditions": [
+        "stroke"
+      ]
     },
     {
       "id": "hypertension",
       "name": "Hypertension (High Blood Pressure)",
       "icd10": "I10",
       "category": "cardiovascular",
-      "symptoms": ["headache", "shortness of breath", "nosebleeds", "dizziness"],
+      "symptoms": [
+        "headache",
+        "shortness of breath",
+        "nosebleeds",
+        "dizziness"
+      ],
       "severity": "mild",
       "description": "A chronic condition where blood pressure against artery walls is consistently too high; often has no symptoms until severe.",
       "advice": "See a doctor for regular blood pressure monitoring. Often managed with lifestyle changes and/or medication.",
       "first_aid": "If blood pressure is severely elevated alongside chest pain, severe headache, vision changes, or confusion, treat as a hypertensive emergency and call emergency services immediately.",
-      "related_conditions": ["myocardial_infarction", "stroke"]
+      "related_conditions": [
+        "myocardial_infarction",
+        "stroke"
+      ]
     },
     {
       "id": "anaphylaxis",
       "name": "Anaphylaxis (Severe Allergic Reaction)",
       "icd10": "T78.2",
       "category": "emergency_trauma",
-      "symptoms": ["swelling of face", "swelling of throat", "difficulty breathing", "cannot breathe", "hives", "rapid pulse", "dizziness", "swelling"],
+      "symptoms": [
+        "swelling of face",
+        "swelling of throat",
+        "difficulty breathing",
+        "cannot breathe",
+        "hives",
+        "rapid pulse",
+        "dizziness",
+        "swelling"
+      ],
       "severity": "emergency",
       "description": "A severe, rapid-onset allergic reaction that can be life-threatening within minutes.",
       "advice": "CALL EMERGENCY SERVICES IMMEDIATELY. Use an epinephrine auto-injector if available.",
       "first_aid": "If the person has an epinephrine auto-injector, help them use it right away. Call emergency services immediately, even if symptoms improve after the injection -- a second reaction can occur. Have them lie flat with legs raised unless it makes breathing harder, in which case let them sit up. Be ready to perform CPR if they stop breathing.",
-      "related_conditions": ["asthma"]
+      "related_conditions": [
+        "asthma"
+      ]
     },
     {
       "id": "choking",
       "name": "Choking (Airway Obstruction)",
       "icd10": "T17",
       "category": "emergency_trauma",
-      "symptoms": ["cannot speak", "cannot breathe", "clutching throat", "high-pitched wheezing", "bluish lips or face", "silent cough"],
+      "symptoms": [
+        "cannot speak",
+        "cannot breathe",
+        "clutching throat",
+        "high-pitched wheezing",
+        "bluish lips or face",
+        "silent cough"
+      ],
       "severity": "emergency",
       "description": "A blockage of the airway, often by food or a foreign object, preventing normal breathing.",
       "advice": "Call emergency services immediately if the person cannot cough, speak, or breathe.",
       "first_aid": "If the person can cough or speak, encourage them to keep coughing. If they cannot breathe, speak, or cough, and you're trained, perform abdominal thrusts (Heimlich maneuver). Call emergency services right away. If they become unresponsive, begin CPR and continue until help arrives.",
-      "related_conditions": ["anaphylaxis"]
+      "related_conditions": [
+        "anaphylaxis"
+      ]
     },
     {
       "id": "severe_bleeding",
       "name": "Severe Bleeding / Hemorrhage",
       "icd10": "R58",
       "category": "emergency_trauma",
-      "symptoms": ["heavy bleeding", "blood soaking through bandages", "pale skin", "rapid pulse", "dizziness", "confusion"],
+      "symptoms": [
+        "heavy bleeding",
+        "blood soaking through bandages",
+        "pale skin",
+        "rapid pulse",
+        "dizziness",
+        "confusion"
+      ],
       "severity": "emergency",
       "description": "Significant blood loss from injury that can lead to shock if not controlled.",
       "advice": "Call emergency services for any heavy or uncontrolled bleeding.",
@@ -341,7 +625,14 @@
       "name": "Burns",
       "icd10": "T30",
       "category": "emergency_trauma",
-      "symptoms": ["skin redness", "blistering", "charred skin", "severe pain", "swelling", "white or leathery skin"],
+      "symptoms": [
+        "skin redness",
+        "blistering",
+        "charred skin",
+        "severe pain",
+        "swelling",
+        "white or leathery skin"
+      ],
       "severity": "moderate",
       "description": "Tissue damage caused by heat, chemicals, electricity, or radiation, ranging from mild to life-threatening.",
       "advice": "Cool minor burns under running water. Seek emergency care for large, deep, or facial/genital burns.",
@@ -353,12 +644,903 @@
       "name": "Heat Stroke",
       "icd10": "T67.0",
       "category": "emergency_trauma",
-      "symptoms": ["very high body temperature", "hot dry skin", "confusion", "rapid pulse", "loss of consciousness", "nausea"],
+      "symptoms": [
+        "very high body temperature",
+        "hot dry skin",
+        "confusion",
+        "rapid pulse",
+        "loss of consciousness",
+        "nausea"
+      ],
       "severity": "emergency",
       "description": "A dangerous rise in body temperature, often from heat exposure or exertion, that impairs the body's ability to cool itself.",
       "advice": "CALL EMERGENCY SERVICES IMMEDIATELY. This is life-threatening.",
       "first_aid": "Move the person to a cool area immediately. Remove excess clothing. Cool the body with water, fanning, or cold packs to the neck, armpits, and groin. Call emergency services -- heat stroke is life-threatening. Do not give fluids if the person is not fully alert.",
       "related_conditions": []
+    },
+    {
+      "id": "strep_throat",
+      "name": "Strep Throat",
+      "icd10": "J02.0",
+      "category": "infectious",
+      "symptoms": [
+        "sore throat",
+        "difficulty swallowing",
+        "fever",
+        "swollen lymph nodes",
+        "white patches on tonsils",
+        "headache",
+        "nausea"
+      ],
+      "severity": "moderate",
+      "description": "A bacterial throat infection that, unlike most sore throats, usually needs antibiotics.",
+      "advice": "See a doctor for a throat swab test -- treatment differs from a viral sore throat, and untreated strep can rarely lead to complications.",
+      "first_aid": "Warm salt-water gargles and fluids can ease discomfort while you arrange a same-day/next-day appointment. Seek urgent care if swallowing saliva becomes very difficult or breathing is affected.",
+      "related_conditions": [
+        "common_cold",
+        "mononucleosis"
+      ]
+    },
+    {
+      "id": "sinusitis",
+      "name": "Sinusitis (Sinus Infection)",
+      "icd10": "J01",
+      "category": "respiratory",
+      "symptoms": [
+        "facial pain",
+        "nasal congestion",
+        "thick nasal discharge",
+        "headache",
+        "reduced sense of smell",
+        "cough",
+        "fever"
+      ],
+      "severity": "mild",
+      "description": "Inflammation or infection of the sinuses, often following a cold.",
+      "advice": "Most cases improve with rest, fluids, and steam inhalation within 7-10 days. See a doctor if symptoms last longer or are severe.",
+      "first_aid": null,
+      "related_conditions": [
+        "common_cold",
+        "allergic_rhinitis"
+      ]
+    },
+    {
+      "id": "otitis_media",
+      "name": "Ear Infection (Otitis Media)",
+      "icd10": "H66",
+      "category": "ent_eye",
+      "symptoms": [
+        "ear pain",
+        "ear pressure",
+        "hearing loss",
+        "fever",
+        "fluid draining from ear",
+        "irritability"
+      ],
+      "severity": "mild",
+      "description": "An infection of the middle ear, common after a cold, especially in children.",
+      "advice": "Many resolve on their own within a few days. See a doctor if pain is severe, fever is high, or symptoms persist beyond 2-3 days.",
+      "first_aid": "A warm compress against the ear may ease discomfort. Seek care promptly if there is fluid or blood draining from the ear, or if a young infant is affected.",
+      "related_conditions": [
+        "common_cold",
+        "sinusitis"
+      ]
+    },
+    {
+      "id": "conjunctivitis",
+      "name": "Conjunctivitis (Pink Eye)",
+      "icd10": "H10",
+      "category": "ent_eye",
+      "symptoms": [
+        "red eye",
+        "itchy eyes",
+        "eye discharge",
+        "watery eyes",
+        "gritty feeling in eye",
+        "crusting eyelids"
+      ],
+      "severity": "mild",
+      "description": "Inflammation of the eye's surface membrane, from a virus, bacteria, or allergy.",
+      "advice": "Warm compresses and good hand hygiene help. See a doctor if there is eye pain, vision changes, or significant light sensitivity -- those aren't typical of simple conjunctivitis.",
+      "first_aid": null,
+      "related_conditions": [
+        "allergic_rhinitis"
+      ]
+    },
+    {
+      "id": "mononucleosis",
+      "name": "Mononucleosis (\"Mono\")",
+      "icd10": "B27",
+      "category": "infectious",
+      "symptoms": [
+        "extreme fatigue",
+        "sore throat",
+        "fever",
+        "swollen lymph nodes",
+        "swollen tonsils",
+        "headache",
+        "muscle aches"
+      ],
+      "severity": "moderate",
+      "description": "A viral infection causing prolonged fatigue and flu-like symptoms, common in teens and young adults.",
+      "advice": "Rest is the main treatment -- fatigue can last weeks. Avoid contact sports for several weeks, as the spleen can be enlarged and vulnerable.",
+      "first_aid": null,
+      "related_conditions": [
+        "strep_throat",
+        "flu"
+      ]
+    },
+    {
+      "id": "chickenpox",
+      "name": "Chickenpox (Varicella)",
+      "icd10": "B01",
+      "category": "infectious",
+      "symptoms": [
+        "itchy rash",
+        "small fluid filled blisters",
+        "fever",
+        "fatigue",
+        "loss of appetite",
+        "headache"
+      ],
+      "severity": "mild",
+      "description": "A contagious viral infection causing an itchy, blistering rash, most common in children.",
+      "advice": "Usually resolves on its own in 1-2 weeks. See a doctor if the rash becomes infected, or promptly if it occurs in an adult, a pregnant person, or someone with a weakened immune system.",
+      "first_aid": null,
+      "related_conditions": []
+    },
+    {
+      "id": "food_poisoning",
+      "name": "Food Poisoning",
+      "icd10": "A05",
+      "category": "gastrointestinal",
+      "symptoms": [
+        "nausea",
+        "vomiting",
+        "watery diarrhea",
+        "abdominal cramping",
+        "fever",
+        "weakness"
+      ],
+      "severity": "moderate",
+      "description": "Illness from contaminated food or water, usually starting within hours of eating.",
+      "advice": "Stay hydrated with small, frequent sips of fluid. Most cases resolve within 1-2 days without treatment.",
+      "first_aid": "Sip water or an oral rehydration solution frequently. Seek care if you can't keep any fluids down, see blood in vomit or stool, or have signs of severe dehydration (very little urination, dizziness, confusion).",
+      "related_conditions": [
+        "gastroenteritis"
+      ]
+    },
+    {
+      "id": "bronchitis",
+      "name": "Acute Bronchitis",
+      "icd10": "J20",
+      "category": "respiratory",
+      "symptoms": [
+        "persistent cough",
+        "mucus production",
+        "chest discomfort",
+        "mild fever",
+        "fatigue",
+        "wheezing"
+      ],
+      "severity": "mild",
+      "description": "Inflammation of the airways, usually following a cold, causing a lingering cough.",
+      "advice": "Rest and fluids usually help; the cough itself can last 2-3 weeks even after other symptoms improve. See a doctor if you cough up blood, have high fever, or feel short of breath.",
+      "first_aid": null,
+      "related_conditions": [
+        "common_cold",
+        "pneumonia"
+      ]
+    },
+    {
+      "id": "copd",
+      "name": "COPD (Chronic Obstructive Pulmonary Disease)",
+      "icd10": "J44",
+      "category": "respiratory",
+      "symptoms": [
+        "chronic cough",
+        "shortness of breath",
+        "wheezing",
+        "chest tightness",
+        "excess mucus production",
+        "fatigue"
+      ],
+      "severity": "moderate",
+      "description": "A long-term lung condition, most often linked to smoking, that makes breathing progressively harder.",
+      "advice": "Managed long-term with a doctor -- inhalers and, if relevant, quitting smoking make a major difference. Seek urgent care for a sudden worsening in breathing.",
+      "first_aid": null,
+      "related_conditions": [
+        "asthma",
+        "bronchitis"
+      ]
+    },
+    {
+      "id": "sleep_apnea",
+      "name": "Obstructive Sleep Apnea",
+      "icd10": "G47.33",
+      "category": "respiratory",
+      "symptoms": [
+        "loud snoring",
+        "gasping during sleep",
+        "daytime sleepiness",
+        "headache upon waking",
+        "difficulty concentrating",
+        "irritability"
+      ],
+      "severity": "mild",
+      "description": "Repeated pauses in breathing during sleep, often noticed by a partner before the person themselves.",
+      "advice": "A sleep study can confirm the diagnosis. Untreated sleep apnea is linked to higher long-term cardiovascular risk, so it's worth having evaluated.",
+      "first_aid": null,
+      "related_conditions": [
+        "hypertension"
+      ]
+    },
+    {
+      "id": "pulmonary_embolism",
+      "name": "Possible Pulmonary Embolism",
+      "icd10": "I26",
+      "category": "respiratory",
+      "symptoms": [
+        "sudden shortness of breath",
+        "sharp chest pain",
+        "rapid heart rate",
+        "coughing up blood",
+        "leg swelling",
+        "dizziness"
+      ],
+      "severity": "emergency",
+      "description": "A blood clot blocking blood flow in the lungs -- a medical emergency, often following a clot that traveled from the leg.",
+      "advice": "CALL EMERGENCY SERVICES IMMEDIATELY. This cannot be safely evaluated at home.",
+      "first_aid": "Keep the person calm and still while waiting for emergency services. Do not let them exert themselves.",
+      "related_conditions": [
+        "deep_vein_thrombosis",
+        "myocardial_infarction"
+      ]
+    },
+    {
+      "id": "vertigo_bppv",
+      "name": "Vertigo (BPPV)",
+      "icd10": "H81.1",
+      "category": "neurological",
+      "symptoms": [
+        "spinning sensation",
+        "dizziness",
+        "loss of balance",
+        "nausea",
+        "triggered by head movement",
+        "brief episodes"
+      ],
+      "severity": "mild",
+      "description": "Benign paroxysmal positional vertigo -- brief spinning episodes triggered by changes in head position, from inner-ear crystals out of place.",
+      "advice": "Often resolves with specific repositioning exercises a doctor or physical therapist can teach you. See a doctor if episodes don't improve, or urgently if vertigo comes with weakness, slurred speech, or double vision.",
+      "first_aid": null,
+      "related_conditions": [
+        "stroke"
+      ]
+    },
+    {
+      "id": "bells_palsy",
+      "name": "Possible Bell's Palsy",
+      "icd10": "G51.0",
+      "category": "neurological",
+      "symptoms": [
+        "facial drooping",
+        "face drooping",
+        "one side of face weakness",
+        "difficulty closing eye",
+        "drooling",
+        "loss of taste",
+        "facial numbness"
+      ],
+      "severity": "moderate",
+      "description": "Sudden, temporary weakness on one side of the face from inflammation of the facial nerve -- usually not a stroke, but needs urgent evaluation to tell the difference.",
+      "advice": "One-sided facial drooping should always be assessed urgently -- Bell's palsy and stroke can look identical at first, and only a clinician can reliably tell them apart. Most Bell's palsy recovers well, especially when treated early.",
+      "first_aid": "Treat sudden facial drooping as a possible stroke until a clinician says otherwise -- seek emergency evaluation immediately rather than waiting to see if it's 'just' Bell's palsy.",
+      "related_conditions": [
+        "stroke"
+      ]
+    },
+    {
+      "id": "concussion",
+      "name": "Possible Concussion",
+      "icd10": "S06.0",
+      "category": "neurological",
+      "symptoms": [
+        "headache after head injury",
+        "confusion",
+        "dizziness",
+        "nausea",
+        "sensitivity to light",
+        "memory problems",
+        "brief loss of consciousness"
+      ],
+      "severity": "moderate",
+      "description": "A mild traumatic brain injury from a blow or jolt to the head, causing temporary disruption of brain function.",
+      "advice": "Needs medical evaluation after any significant head injury, even if brief. Rest and avoid screens, sports, and alcohol while recovering.",
+      "first_aid": "Seek urgent evaluation, especially if there was any loss of consciousness. Seek EMERGENCY care immediately for worsening headache, repeated vomiting, increasing confusion, unequal pupils, seizures, or difficulty waking the person.",
+      "related_conditions": [
+        "stroke"
+      ]
+    },
+    {
+      "id": "cluster_headache",
+      "name": "Cluster Headache",
+      "icd10": "G44.0",
+      "category": "neurological",
+      "symptoms": [
+        "severe one sided headache",
+        "eye pain",
+        "tearing eye",
+        "nasal congestion one side",
+        "restlessness",
+        "occurs in clusters"
+      ],
+      "severity": "moderate",
+      "description": "Extremely severe, one-sided headaches around the eye, occurring in clusters of attacks over weeks.",
+      "advice": "See a neurologist for diagnosis and preventive treatment -- these are very treatable once correctly identified, but are often mistaken for something else initially.",
+      "first_aid": null,
+      "related_conditions": [
+        "migraine",
+        "tension_headache"
+      ]
+    },
+    {
+      "id": "irritable_bowel_syndrome",
+      "name": "Irritable Bowel Syndrome (IBS)",
+      "icd10": "K58",
+      "category": "gastrointestinal",
+      "symptoms": [
+        "abdominal cramping",
+        "bloating",
+        "alternating diarrhea and constipation",
+        "gas",
+        "mucus in stool",
+        "symptoms relieved by bowel movement"
+      ],
+      "severity": "mild",
+      "description": "A common chronic condition affecting how the gut functions, without visible damage on standard tests.",
+      "advice": "Diet and stress patterns often play a role -- a doctor can help identify triggers and rule out other causes first.",
+      "first_aid": null,
+      "related_conditions": [
+        "gerd"
+      ]
+    },
+    {
+      "id": "constipation",
+      "name": "Constipation",
+      "icd10": "K59.0",
+      "category": "gastrointestinal",
+      "symptoms": [
+        "infrequent bowel movements",
+        "straining",
+        "hard stool",
+        "bloating",
+        "abdominal discomfort",
+        "feeling of incomplete emptying"
+      ],
+      "severity": "mild",
+      "description": "Difficulty or infrequency passing stool, usually related to diet, hydration, or activity level.",
+      "advice": "More fluids, fiber, and movement usually help. See a doctor if it's new, persistent, or comes with weight loss or blood in stool.",
+      "first_aid": null,
+      "related_conditions": [
+        "hemorrhoids",
+        "irritable_bowel_syndrome"
+      ]
+    },
+    {
+      "id": "hemorrhoids",
+      "name": "Hemorrhoids",
+      "icd10": "K64",
+      "category": "gastrointestinal",
+      "symptoms": [
+        "rectal bleeding",
+        "anal itching",
+        "anal pain",
+        "swelling near anus",
+        "lump near anus"
+      ],
+      "severity": "mild",
+      "description": "Swollen veins in the lower rectum or anus, often from straining or prolonged sitting.",
+      "advice": "Usually manageable with fiber, hydration, and warm baths. See a doctor to confirm the cause, especially for any rectal bleeding -- it can also signal other conditions that need ruling out.",
+      "first_aid": null,
+      "related_conditions": [
+        "constipation"
+      ]
+    },
+    {
+      "id": "gallstones",
+      "name": "Gallstones (Cholelithiasis)",
+      "icd10": "K80",
+      "category": "gastrointestinal",
+      "symptoms": [
+        "upper abdominal pain",
+        "pain after fatty meal",
+        "nausea",
+        "vomiting",
+        "back pain between shoulder blades",
+        "bloating"
+      ],
+      "severity": "moderate",
+      "description": "Hardened deposits in the gallbladder that can cause pain, especially after fatty meals.",
+      "advice": "See a doctor for an ultrasound to confirm. Seek urgent care if pain is severe and persistent, or if fever or yellowing of the skin/eyes develops -- those suggest a complication.",
+      "first_aid": null,
+      "related_conditions": [
+        "peptic_ulcer_disease"
+      ]
+    },
+    {
+      "id": "diverticulitis",
+      "name": "Diverticulitis",
+      "icd10": "K57",
+      "category": "gastrointestinal",
+      "symptoms": [
+        "lower left abdominal pain",
+        "fever",
+        "nausea",
+        "change in bowel habits",
+        "bloating",
+        "tenderness in abdomen"
+      ],
+      "severity": "moderate",
+      "description": "Inflammation or infection of small pouches that can form in the colon wall.",
+      "advice": "See a doctor promptly for diagnosis and treatment, which may include antibiotics. Seek emergency care for severe, worsening pain or a rigid, very tender abdomen.",
+      "first_aid": null,
+      "related_conditions": [
+        "appendicitis"
+      ]
+    },
+    {
+      "id": "benign_prostatic_hyperplasia",
+      "name": "Benign Prostatic Hyperplasia (BPH)",
+      "icd10": "N40",
+      "category": "urological",
+      "symptoms": [
+        "frequent urination",
+        "weak urine stream",
+        "difficulty starting urination",
+        "urgency",
+        "waking at night to urinate",
+        "incomplete bladder emptying"
+      ],
+      "severity": "mild",
+      "description": "Non-cancerous enlargement of the prostate gland, common with age, that can affect urination.",
+      "advice": "See a doctor for evaluation -- effective treatments exist, from lifestyle changes to medication. Seek urgent care if you're unable to urinate at all.",
+      "first_aid": null,
+      "related_conditions": [
+        "urinary_tract_infection"
+      ]
+    },
+    {
+      "id": "panic_attack",
+      "name": "Panic Attack",
+      "icd10": "F41.0",
+      "category": "mental_health",
+      "symptoms": [
+        "sudden intense fear",
+        "rapid heart rate",
+        "chest tightness",
+        "shortness of breath",
+        "trembling",
+        "sweating",
+        "feeling of impending doom",
+        "dizziness"
+      ],
+      "severity": "moderate",
+      "description": "A sudden surge of intense fear with physical symptoms, peaking within minutes -- frightening but not dangerous on its own.",
+      "advice": "Slow breathing and grounding techniques can help in the moment. If panic attacks recur, a doctor or therapist can help -- they respond well to treatment.",
+      "first_aid": "Because panic attacks can feel like a heart attack, a first episode -- or one with chest pain -- is reasonable to have checked urgently to rule out a cardiac cause. Encourage slow, steady breathing.",
+      "related_conditions": [
+        "anxiety",
+        "myocardial_infarction"
+      ]
+    },
+    {
+      "id": "insomnia",
+      "name": "Insomnia",
+      "icd10": "G47.0",
+      "category": "mental_health",
+      "symptoms": [
+        "difficulty falling asleep",
+        "waking during the night",
+        "waking too early",
+        "daytime fatigue",
+        "irritability",
+        "difficulty concentrating"
+      ],
+      "severity": "mild",
+      "description": "Persistent difficulty falling or staying asleep that affects daytime functioning.",
+      "advice": "Consistent sleep habits and limiting screens/caffeine before bed help many people. See a doctor if it persists beyond a few weeks -- it can also be a sign of an underlying condition worth checking.",
+      "first_aid": null,
+      "related_conditions": [
+        "anxiety",
+        "depression"
+      ]
+    },
+    {
+      "id": "bipolar_disorder",
+      "name": "Bipolar Disorder",
+      "icd10": "F31",
+      "category": "mental_health",
+      "symptoms": [
+        "periods of elevated mood",
+        "decreased need for sleep",
+        "racing thoughts",
+        "periods of low mood",
+        "loss of interest",
+        "impulsivity",
+        "irritability"
+      ],
+      "severity": "moderate",
+      "description": "A mood disorder involving episodes of both depression and mania or hypomania (unusually elevated mood/energy).",
+      "advice": "A mental health professional can assess this properly -- it's a pattern-over-time diagnosis, not something to self-diagnose from one episode. Effective long-term treatments exist.",
+      "first_aid": "If someone shows signs of severe mania (not sleeping for days, dangerous risk-taking) or expresses thoughts of self-harm, help them reach a mental health professional or crisis line promptly, and don't leave them alone if there's any safety concern.",
+      "related_conditions": [
+        "depression",
+        "anxiety"
+      ]
+    },
+    {
+      "id": "atrial_fibrillation",
+      "name": "Possible Atrial Fibrillation",
+      "icd10": "I48",
+      "category": "cardiovascular",
+      "symptoms": [
+        "irregular heartbeat",
+        "heart palpitations",
+        "rapid heart rate",
+        "fatigue",
+        "dizziness",
+        "shortness of breath"
+      ],
+      "severity": "moderate",
+      "description": "An irregular, often rapid heart rhythm originating in the heart's upper chambers.",
+      "advice": "See a doctor for an ECG to confirm -- it's manageable but raises stroke risk if untreated, so it shouldn't be ignored.",
+      "first_aid": "Seek urgent care if palpitations come with chest pain, fainting, or severe shortness of breath.",
+      "related_conditions": [
+        "hypertension",
+        "stroke"
+      ]
+    },
+    {
+      "id": "heart_failure",
+      "name": "Possible Heart Failure",
+      "icd10": "I50",
+      "category": "cardiovascular",
+      "symptoms": [
+        "shortness of breath on exertion",
+        "swelling in legs",
+        "fatigue",
+        "rapid weight gain",
+        "difficulty breathing lying down",
+        "persistent cough"
+      ],
+      "severity": "moderate",
+      "description": "A condition where the heart doesn't pump blood as effectively as it should, causing fluid buildup.",
+      "advice": "Needs prompt medical evaluation -- treatable and manageable, but worsens without care. Seek emergency care for sudden severe shortness of breath or chest pain.",
+      "first_aid": null,
+      "related_conditions": [
+        "hypertension",
+        "myocardial_infarction"
+      ]
+    },
+    {
+      "id": "deep_vein_thrombosis",
+      "name": "Possible Deep Vein Thrombosis (DVT)",
+      "icd10": "I82",
+      "category": "cardiovascular",
+      "symptoms": [
+        "leg swelling one side",
+        "leg pain",
+        "warmth in leg",
+        "redness in leg",
+        "tenderness in calf"
+      ],
+      "severity": "emergency",
+      "description": "A blood clot in a deep vein, usually in the leg -- urgent because it can travel to the lungs (pulmonary embolism).",
+      "advice": "Seek urgent same-day medical evaluation. Go to emergency care immediately if you also develop sudden shortness of breath or chest pain.",
+      "first_aid": "Avoid massaging or applying heavy pressure to the area. Keep the leg still and get evaluated urgently rather than waiting.",
+      "related_conditions": [
+        "pulmonary_embolism"
+      ]
+    },
+    {
+      "id": "hyperthyroidism",
+      "name": "Hyperthyroidism",
+      "icd10": "E05",
+      "category": "endocrine",
+      "symptoms": [
+        "unintentional weight loss",
+        "rapid heart rate",
+        "heat intolerance",
+        "tremor",
+        "anxiety",
+        "increased appetite",
+        "sweating"
+      ],
+      "severity": "mild",
+      "description": "An overactive thyroid producing too much thyroid hormone, speeding up the body's processes.",
+      "advice": "See a doctor for blood tests -- well managed with medication once diagnosed.",
+      "first_aid": null,
+      "related_conditions": [
+        "hypothyroidism",
+        "anxiety"
+      ]
+    },
+    {
+      "id": "diabetic_ketoacidosis",
+      "name": "Possible Diabetic Ketoacidosis (DKA)",
+      "icd10": "E10.1",
+      "category": "endocrine",
+      "symptoms": [
+        "excessive thirst",
+        "frequent urination",
+        "nausea",
+        "vomiting",
+        "abdominal pain",
+        "fruity smelling breath",
+        "confusion",
+        "rapid breathing"
+      ],
+      "severity": "emergency",
+      "description": "A dangerous complication of diabetes where the body starts breaking down fat too fast, making the blood acidic.",
+      "advice": "CALL EMERGENCY SERVICES OR GO TO AN EMERGENCY ROOM IMMEDIATELY. This can become life-threatening quickly, especially in someone with known diabetes.",
+      "first_aid": "If the person has diabetes and is confused or difficult to wake, treat this as a medical emergency and get help immediately.",
+      "related_conditions": [
+        "type2_diabetes",
+        "hypoglycemia"
+      ]
+    },
+    {
+      "id": "hypoglycemia",
+      "name": "Possible Low Blood Sugar (Hypoglycemia)",
+      "icd10": "E16.2",
+      "category": "endocrine",
+      "symptoms": [
+        "shakiness",
+        "sweating",
+        "confusion",
+        "rapid heartbeat",
+        "hunger",
+        "irritability",
+        "weakness",
+        "blurred vision"
+      ],
+      "severity": "moderate",
+      "description": "Blood sugar dropping too low, most common in people on diabetes medication -- can escalate quickly if untreated.",
+      "advice": "If someone with diabetes shows these signs, they typically need fast-acting sugar right away, then a follow-up meal.",
+      "first_aid": "If the person is conscious and able to swallow, giving a fast-acting sugar source (like juice or regular soda) can help quickly. If they become unconscious or unable to swallow safely, do not give anything by mouth -- call emergency services immediately.",
+      "related_conditions": [
+        "type2_diabetes",
+        "diabetic_ketoacidosis"
+      ]
+    },
+    {
+      "id": "lupus",
+      "name": "Possible Lupus (SLE)",
+      "icd10": "M32",
+      "category": "autoimmune",
+      "symptoms": [
+        "joint pain",
+        "fatigue",
+        "butterfly rash on face",
+        "fever",
+        "sensitivity to sunlight",
+        "hair loss",
+        "chest pain when breathing"
+      ],
+      "severity": "moderate",
+      "description": "A chronic autoimmune condition where the immune system attacks the body's own tissues, affecting joints, skin, and organs.",
+      "advice": "Needs specialist evaluation (rheumatologist) and blood testing to diagnose -- symptoms vary widely between people, so this is a starting point, not a diagnosis.",
+      "first_aid": null,
+      "related_conditions": [
+        "rheumatoid_arthritis"
+      ]
+    },
+    {
+      "id": "psoriasis",
+      "name": "Psoriasis",
+      "icd10": "L40",
+      "category": "dermatological",
+      "symptoms": [
+        "red scaly patches",
+        "itchy skin",
+        "dry cracked skin",
+        "thickened nails",
+        "joint pain"
+      ],
+      "severity": "mild",
+      "description": "A chronic autoimmune condition causing skin cells to build up rapidly, forming scaly patches.",
+      "advice": "See a dermatologist -- many effective treatments exist, from topical creams to systemic therapy depending on severity.",
+      "first_aid": null,
+      "related_conditions": [
+        "rheumatoid_arthritis"
+      ]
+    },
+    {
+      "id": "eczema",
+      "name": "Eczema (Atopic Dermatitis)",
+      "icd10": "L20",
+      "category": "dermatological",
+      "symptoms": [
+        "itchy skin",
+        "dry skin",
+        "red rash",
+        "skin cracking",
+        "thickened skin patches"
+      ],
+      "severity": "mild",
+      "description": "A chronic condition causing dry, itchy, inflamed skin, often starting in childhood.",
+      "advice": "Regular moisturizing and avoiding known triggers help most people. See a doctor if it's widespread, infected-looking, or not improving with basic care.",
+      "first_aid": null,
+      "related_conditions": [
+        "contact_dermatitis",
+        "allergic_rhinitis"
+      ]
+    },
+    {
+      "id": "contact_dermatitis",
+      "name": "Contact Dermatitis",
+      "icd10": "L23",
+      "category": "dermatological",
+      "symptoms": [
+        "localized rash",
+        "itching",
+        "redness",
+        "burning skin",
+        "blisters",
+        "swelling at contact site"
+      ],
+      "severity": "mild",
+      "description": "Skin inflammation from direct contact with an irritant or allergen.",
+      "advice": "Identify and avoid the trigger; a cool compress and fragrance-free moisturizer help. See a doctor if it's widespread, on the face, or not improving.",
+      "first_aid": "Rinse the area with water if the trigger is a known irritant. Seek urgent care if swelling spreads to the face/throat or breathing is affected -- that could indicate a more serious allergic reaction.",
+      "related_conditions": [
+        "eczema",
+        "anaphylaxis"
+      ]
+    },
+    {
+      "id": "cellulitis",
+      "name": "Possible Cellulitis",
+      "icd10": "L03",
+      "category": "dermatological",
+      "symptoms": [
+        "red skin",
+        "warm skin",
+        "swelling",
+        "skin tenderness",
+        "fever",
+        "spreading redness"
+      ],
+      "severity": "moderate",
+      "description": "A bacterial skin infection that can spread quickly through the deeper layers of skin.",
+      "advice": "See a doctor promptly -- this usually needs antibiotics and can worsen quickly if untreated.",
+      "first_aid": "Seek urgent/emergency care if the redness is spreading rapidly, you develop a high fever, feel very unwell, or notice red streaking away from the area -- these suggest the infection is spreading.",
+      "related_conditions": [
+        "contact_dermatitis"
+      ]
+    },
+    {
+      "id": "fungal_skin_infection",
+      "name": "Fungal Skin Infection (Ringworm/Tinea)",
+      "icd10": "B35",
+      "category": "dermatological",
+      "symptoms": [
+        "ring shaped rash",
+        "itchy skin",
+        "scaly patch",
+        "red raised border"
+      ],
+      "severity": "mild",
+      "description": "A common, contagious fungal skin infection despite the name, not caused by a worm.",
+      "advice": "Usually treatable with an antifungal cream. See a doctor if it doesn't improve, covers a large area, or affects the scalp.",
+      "first_aid": null,
+      "related_conditions": [
+        "eczema"
+      ]
+    },
+    {
+      "id": "lower_back_pain",
+      "name": "Lower Back Pain (Lumbar Strain)",
+      "icd10": "M54.5",
+      "category": "musculoskeletal",
+      "symptoms": [
+        "lower back pain",
+        "muscle stiffness",
+        "pain worse with movement",
+        "muscle spasm",
+        "difficulty standing straight"
+      ],
+      "severity": "mild",
+      "description": "Pain from strained muscles or ligaments in the lower back, often from lifting or poor posture.",
+      "advice": "Gentle movement (not bed rest) usually helps recovery. See a doctor if pain is severe, radiates down a leg, or comes with numbness, weakness, or loss of bladder/bowel control -- the last combination needs emergency evaluation.",
+      "first_aid": null,
+      "related_conditions": [
+        "sciatica"
+      ]
+    },
+    {
+      "id": "sciatica",
+      "name": "Sciatica",
+      "icd10": "M54.3",
+      "category": "musculoskeletal",
+      "symptoms": [
+        "shooting pain down leg",
+        "lower back pain",
+        "numbness in leg",
+        "tingling in leg",
+        "weakness in leg",
+        "pain worse when sitting"
+      ],
+      "severity": "mild",
+      "description": "Pain radiating along the sciatic nerve, usually from a compressed nerve in the lower spine.",
+      "advice": "Often improves with time, gentle stretching, and activity modification. See a doctor if it's severe, persistent, or comes with leg weakness or loss of bladder/bowel control -- the latter needs emergency care.",
+      "first_aid": null,
+      "related_conditions": [
+        "lower_back_pain"
+      ]
+    },
+    {
+      "id": "ankle_sprain",
+      "name": "Ankle Sprain",
+      "icd10": "S93.4",
+      "category": "musculoskeletal",
+      "symptoms": [
+        "ankle pain",
+        "ankle swelling",
+        "bruising",
+        "difficulty bearing weight",
+        "ankle instability"
+      ],
+      "severity": "mild",
+      "description": "Stretching or tearing of the ligaments around the ankle, usually from twisting the joint.",
+      "advice": "Rest, ice, compression, and elevation (RICE) for the first 48 hours. See a doctor if you can't bear any weight at all, or if pain/swelling is severe -- an X-ray may be needed to rule out a fracture.",
+      "first_aid": "Rest the ankle, apply ice wrapped in a cloth for 15-20 minutes at a time, use a compression wrap, and keep it elevated above heart level when possible.",
+      "related_conditions": []
+    },
+    {
+      "id": "gout",
+      "name": "Gout",
+      "icd10": "M10",
+      "category": "musculoskeletal",
+      "symptoms": [
+        "sudden joint pain",
+        "joint swelling",
+        "joint redness",
+        "joint warmth",
+        "big toe pain",
+        "joint stiffness"
+      ],
+      "severity": "moderate",
+      "description": "A form of arthritis from uric acid crystal buildup, causing sudden, intense joint pain, classically in the big toe.",
+      "advice": "See a doctor for confirmation and treatment -- both the acute attack and long-term prevention are manageable with medication and diet adjustments.",
+      "first_aid": null,
+      "related_conditions": [
+        "rheumatoid_arthritis",
+        "osteoarthritis"
+      ]
+    },
+    {
+      "id": "fibromyalgia",
+      "name": "Fibromyalgia",
+      "icd10": "M79.7",
+      "category": "musculoskeletal",
+      "symptoms": [
+        "widespread muscle pain",
+        "fatigue",
+        "sleep problems",
+        "difficulty concentrating",
+        "tender points",
+        "headache"
+      ],
+      "severity": "moderate",
+      "description": "A chronic condition causing widespread musculoskeletal pain, often with fatigue and sleep/mood/memory issues.",
+      "advice": "Diagnosis usually involves ruling out other causes first -- a doctor can guide next steps. A combination of gentle exercise, sleep support, and sometimes medication helps most people.",
+      "first_aid": null,
+      "related_conditions": [
+        "depression",
+        "insomnia"
+      ]
     }
   ]
 }

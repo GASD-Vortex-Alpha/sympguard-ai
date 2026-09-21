@@ -58,6 +58,32 @@ class SymptomCheck(Base):
     user = relationship("User", back_populates="checks")
 
 
+class SymptomCheckSession(Base):
+    """
+    V4 adaptive-questions flow state (extracted symptoms + answers so far).
+
+    Deliberately holds only small, derivable JSON blobs, not the question
+    queue itself -- the queue is a pure function of extracted_symptoms
+    (questions/question_engine.build_queue), so it's recomputed on read
+    rather than stored, keeping this table tiny and avoiding two copies of
+    the question bank's logic ever drifting apart.
+
+    This table exists specifically so the app works correctly on serverless
+    platforms (Vercel, etc.) where each request can land on a different
+    instance -- an in-memory dict (V4's original hackathon-scale approach)
+    silently breaks there. See README "Deployment" for the Vercel+Supabase
+    path.
+    """
+    __tablename__ = "symptom_check_sessions"
+
+    id = Column(String, primary_key=True, default=gen_uuid)
+    raw_text = Column(Text, nullable=False)
+    region = Column(String, nullable=True)
+    extracted_symptoms = Column(Text, nullable=False)  # JSON-encoded list[str]
+    answered = Column(Text, nullable=False, default="{}")  # JSON-encoded {question_id: answer}
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
 def init_db():
     Base.metadata.create_all(bind=engine)
 

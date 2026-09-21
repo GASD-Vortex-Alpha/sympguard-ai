@@ -101,6 +101,11 @@ class FollowUpRequest(BaseModel):
     answers: list[AnswerIn]
 
 
+class AddDetailsRequest(BaseModel):
+    session_id: str
+    text: str = Field(..., min_length=1, description="Free-text: any additional symptoms not captured by the questions so far")
+
+
 class FollowUpResponse(BaseModel):
     questions: list[QuestionOut]
     done: bool

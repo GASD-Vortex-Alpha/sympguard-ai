@@ -71,6 +71,25 @@ def test_extract_signals_ignores_no_answers():
     assert signals == []
 
 
+def test_add_details_can_surface_a_new_topic_not_in_the_original_text():
+    """Regression test for the /api/symptoms/add-details flow: typing an
+    additional symptom mid-conversation should be able to trigger a
+    previously-irrelevant question topic, not just get silently ignored.
+    Also a regression test for a real gap found while testing this: the
+    rash_skin topic's trigger_symptoms didn't include 'itching' even though
+    it's a real, extractable KB phrase -- 'a rash... and some itching'
+    extracted 'itching' successfully but the topic never fired on it."""
+    original_extracted = ['headache']
+    new_text = 'I also just noticed a rash on my arms and some itching'
+    new_symptoms = nlp.extract_symptoms(new_text)
+    assert 'itching' in new_symptoms
+
+    merged = original_extracted + [s for s in new_symptoms if s not in original_extracted]
+    queue = qe.build_queue(merged)
+    topic_ids = {q.get('topic_id') for q in queue}
+    assert 'rash_skin' in topic_ids
+
+
 def test_full_flow_sudden_headache_plus_vision_changes_is_emergency():
     """End-to-end: build queue, simulate answers, feed signals back into the
     safety engine -- this is exactly what main.py's /api/symptoms/analyze

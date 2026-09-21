@@ -125,7 +125,68 @@
     continueBtn.addEventListener('click', submitAnswers);
     card.appendChild(continueBtn);
 
+    card.appendChild(renderAddDetailsToggle());
+
     showView('view-questions');
+  }
+
+  function renderAddDetailsToggle() {
+    var wrap = document.createElement('div');
+    wrap.className = 'add-details-wrap';
+
+    var toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.className = 'add-details-toggle';
+    toggle.textContent = 'Something else going on? Type it here';
+
+    var panel = document.createElement('div');
+    panel.className = 'add-details-panel';
+    panel.style.display = 'none';
+    panel.innerHTML =
+      '<textarea id="add-details-text" rows="2" placeholder="e.g. I also noticed a rash on my arm, or: I forgot to mention I have a fever too" maxlength="500"></textarea>' +
+      '<button type="button" class="btn btn-secondary" id="add-details-submit">Add to my symptom check</button>' +
+      '<p class="faint" id="add-details-status" style="margin:0.5em 0 0;"></p>';
+
+    toggle.addEventListener('click', function () {
+      var open = panel.style.display !== 'none';
+      panel.style.display = open ? 'none' : '';
+    });
+
+    wrap.appendChild(toggle);
+    wrap.appendChild(panel);
+
+    // Deferred so the elements exist in the DOM before wiring the handler
+    setTimeout(function () {
+      var submitBtn = document.getElementById('add-details-submit');
+      if (submitBtn) submitBtn.addEventListener('click', submitAddDetails);
+    }, 0);
+
+    return wrap;
+  }
+
+  function submitAddDetails() {
+    var textarea = document.getElementById('add-details-text');
+    var status = document.getElementById('add-details-status');
+    var text = textarea.value.trim();
+    if (text.length < 3) {
+      status.textContent = 'Add a few more words describing what you noticed.';
+      return;
+    }
+    var submitBtn = document.getElementById('add-details-submit');
+    submitBtn.disabled = true;
+    status.textContent = 'Adding…';
+
+    SympGuardAPI.addDetails(state.sessionId, text).then(function (data) {
+      if (data.done) {
+        runAnalysis();
+        return;
+      }
+      setStep(2);
+      renderQuestionBatch(data.questions);
+    }).catch(function (err) {
+      submitBtn.disabled = false;
+      status.textContent = 'Could not add that: ' + err.message;
+    });
   }
 
   function updateContinueButton() {
